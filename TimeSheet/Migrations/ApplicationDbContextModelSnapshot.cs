@@ -53,6 +53,20 @@ namespace TimeSheet.Migrations
 
                     b.ToTable("Users");
                 });
+
+            modelBuilder.Entity("TimeSheet.Models.UserDashboard", b =>
+                {
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Username");
+
+                    b.ToTable("UsersDashboards");
+                });
 #pragma warning restore 612, 618
         }
     }
