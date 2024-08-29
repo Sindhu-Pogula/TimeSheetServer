@@ -1,11 +1,18 @@
 ﻿@model TimeSheet.Models.User
 
-@{
-    ViewData["Title"] = "Dashboard";
-}
+<h2>Welcome, @Model.Username</h2>
+<p>This is your dashboard, @Model.Username. You are logged in!</p>
 
-<h2>Welcome, @Model.Username!</h2>
+<form asp-action="Signup" method="post">
+    <div class="form-group">
+        <label asp-for="Username" class="control-label"></label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
 
-<p>Email: @Model.Email</p>
-
-<!-- Add more user-specific content here -->
+    <div class="form-group">
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+</form>
