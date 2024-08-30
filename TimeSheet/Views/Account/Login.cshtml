@@ -2,10 +2,20 @@
 
 @{
     ViewData["Title"] = "Login";
+    var registrationSuccess = Context.Session.GetString("RegistrationSuccess");
+    if (registrationSuccess == "true")
+    {
+        // Clear the session flag
+        Context.Session.Remove("RegistrationSuccess");
+    }
 }
 
-<p>You Are,Registered Successfully..!</p>
-<p>Please Login below</p>
+@if (registrationSuccess == "true")
+{
+    <p>You are registered successfully! Please log in below.</p>
+}
+
+
 <h2>Login</h2>
 <style>
 body {

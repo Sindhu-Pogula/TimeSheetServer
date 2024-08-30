@@ -1,7 +1,51 @@
 ﻿@model TimeSheet.Models.User
 
 <h2>Welcome, @Model.Username</h2>
-<p>This is your dashboard, @Model.Username. You are logged in!</p>
+<p>This is your dashboard, <b>@Model.Username</b>. You are logged in!</p>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: left;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    thead tr {
+        background-color: #4CAF50;
+        color: white;
+        text-align: left;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+
+    td[contenteditable="true"] {
+        background-color: #e9f5e9;
+        outline: none;
+    }
+</style>
+
 
 <form asp-action="Signup" method="post">
     <div class="form-group">
@@ -16,3 +60,79 @@
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 </form>
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Projects</th>
+            <!-- Dynamic Columns -->
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Tursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+            <!-- /Dynamic Columns -->
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="total-hours"></td>
+        </tr>
+        <tr>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="total-hours"></td>
+        </tr>
+        <tr>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td class="total-hours"></td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    // Function to update the total hours for a row
+    function updateTotalHours(row) {
+        let total = 0;
+        row.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+            const hours = parseFloat(cell.textContent) || 0;
+            total += hours;
+        });
+        row.querySelector('.total-hours').textContent = total;
+    }
+
+    // Attach input event to each editable cell
+    document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+        cell.addEventListener('input', function () {
+            updateTotalHours(this.parentElement);
+        });
+    });
+</script>
+

@@ -1,9 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TimeSheet.Models;
 
 public class AccountController : Controller
 {
-    private static List<User> users = new List<User>();
+    private readonly ApplicationDbContext _context;
+
+    public AccountController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
 
     // GET: Account/Signup
     public ActionResult Signup()
@@ -13,12 +22,24 @@ public class AccountController : Controller
 
     // POST: Account/Signup
     [HttpPost]
-    public ActionResult Signup(User user)
+    public async Task<ActionResult> Signup(User user)
     {
         if (ModelState.IsValid)
         {
-            // Add user to the database (in this case, a simple list for demonstration)
-            users.Add(user);
+            // Check if a user with the same username already exists
+            if (await _context.Users.AnyAsync(u => u.Username == user.Username))
+            {
+                // Add a model error to indicate that the user already exists
+                ModelState.AddModelError("Username", "User already exists.");
+                return View(user);
+            }
+
+            // Add user to the database
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+           /// / Set a flag in session to indicate successful registration
+        HttpContext.Session.SetString("RegistrationSuccess", "true");
 
             // Redirect to the Login page after successful signup
             return RedirectToAction("Login");
@@ -35,10 +56,10 @@ public class AccountController : Controller
 
     // POST: Account/Login
     [HttpPost]
-    public ActionResult Login(string username, string password)
+    public async Task<ActionResult> Login(string username, string password)
     {
         // Validate the user (simple check for demonstration)
-        var user = users.SingleOrDefault(u => u.Username == username && u.Password == password);
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username && u.Password == password);
 
         if (user != null)
         {
@@ -67,7 +88,7 @@ public class AccountController : Controller
         }
 
         // Find the user based on the username stored in session
-        var user = users.SingleOrDefault(u => u.Username == username);
+        var user = _context.Users.SingleOrDefault(u => u.Username == username);
 
         if (user == null)
         {

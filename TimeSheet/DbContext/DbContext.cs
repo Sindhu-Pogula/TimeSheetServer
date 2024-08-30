@@ -9,6 +9,5 @@ namespace TimeSheet.Models
         {
         }
         public DbSet<User> Users { get; set; }
-        public DbSet<UserDashboard> UsersDashboards { get; set; }
     }
 }
