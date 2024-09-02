@@ -2,6 +2,7 @@
 
 <h2>Welcome, @Model.Username</h2>
 <p>This is your dashboard, <b>@Model.Username</b>. You are logged in!</p>
+
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -44,22 +45,52 @@
         background-color: #e9f5e9;
         outline: none;
     }
-</style>
 
+    .control-label {
+        font-weight: bold;
+    }
+
+    .button-container {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+        .button-container button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+            .button-container button.reset {
+                background-color: #f44336; /* Red */
+            }
+</style>
 
 <form asp-action="Signup" method="post">
     <div class="form-group">
-        <label asp-for="Username" class="control-label"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+        <label asp-for="Username" class="control-label">Username:</label>
+        <span class="form-control-plaintext">@Model.Username</span>
+        <input type="hidden" asp-for="Username" />
     </div>
 
     <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
+        <label asp-for="Email" class="control-label">Email:</label>
+        <span class="form-control-plaintext">@Model.Email</span>
+        <input type="hidden" asp-for="Email" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
+    
+
 </form>
+
 <table>
     <thead>
         <tr>
@@ -69,7 +100,7 @@
             <th>Monday</th>
             <th>Tuesday</th>
             <th>Wednesday</th>
-            <th>Tursday</th>
+            <th>Thursday</th>
             <th>Friday</th>
             <th>Saturday</th>
             <th>Sunday</th>
@@ -78,8 +109,10 @@
         </tr>
     </thead>
     <tbody>
+    @for (int i = 0; i < 7; i++)
+    {
         <tr>
-            <td contenteditable="true"></td>
+            <td><input type="date" name="date" /></td>
             <td contenteditable="true"></td>
             <td contenteditable="true"></td>
             <td contenteditable="true"></td>
@@ -90,42 +123,36 @@
             <td contenteditable="true"></td>
             <td class="total-hours"></td>
         </tr>
-        <tr>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td class="total-hours"></td>
-        </tr>
-        <tr>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td class="total-hours"></td>
-        </tr>
-    </tbody>
+    }
+    
+</tbody>
 </table>
+<div class="button-container">
+    <button type="button" onclick="submitTimesheet()">Submit</button>
+    <button type="button" class="reset" onclick="resetTable()">Reset</button>
+</div>
 
 <script>
     // Function to update the total hours for a row
     function updateTotalHours(row) {
         let total = 0;
-        row.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+        let isValid = true;
+        row.querySelectorAll('td[contenteditable="true"]:not(:first-child):not(:nth-child(2))').forEach(cell => {
             const hours = parseFloat(cell.textContent) || 0;
+            if (hours < 0 || hours > 24) {
+                alert("Please enter hours between 0 and 24.");
+                cell.textContent = ''; // Clear invalid entry
+                isValid = false;
+                return;
+            }
             total += hours;
         });
-        row.querySelector('.total-hours').textContent = total;
+        if (total > 24) {
+            alert("Total hours for a day cannot exceed 24 hours.");
+            row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = ''); // Clear all cells
+            total = 0;
+        }
+        row.querySelector('.total-hours').textContent = total.toFixed(2);
     }
 
     // Attach input event to each editable cell
@@ -134,5 +161,42 @@
             updateTotalHours(this.parentElement);
         });
     });
-</script>
 
+    function submitTimesheet() {
+        const rows = document.querySelectorAll('tbody tr');
+        const data = [];
+
+        rows.forEach(row => {
+            const date = row.querySelector('input[type="date"]').value;
+            const project = row.cells[1].textContent;
+            const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
+            const totalHours = row.querySelector('.total-hours').textContent;
+
+            if (date && project && totalHours > 0) {
+                data.push({ date, project, hours, totalHours });
+            }
+        });
+
+        fetch('/Timesheet/SaveTimesheet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(result => {
+                console.log('Success:', result);
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function resetTable() {
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = '');
+            row.querySelector('input[type="date"]').value = '';
+            row.querySelector('.total-hours').textContent = '';
+        });
+    }
+</script>
