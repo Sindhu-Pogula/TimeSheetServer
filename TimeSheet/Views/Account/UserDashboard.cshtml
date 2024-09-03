@@ -139,7 +139,7 @@
         // Function to set 'To Date' based on 'From Date'
         function updateToDate(fromDateInput) {
             const fromDate = new Date(fromDateInput.value);
-            if (!isNaN(fromDate.getTime())) {
+            if (!isNaN(fromDate.getTime())) { 
                 const toDate = new Date(fromDate);
                 toDate.setDate(fromDate.getDate() + 6); // Set 'To Date' to a week later
 
