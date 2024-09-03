@@ -108,24 +108,60 @@
         </tr>
     </thead>
     <tbody>
-    @for (int i = 0; i < 7; i++)
-    {
-        <tr>
-            <td><input type="date" name="date" /></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td class="total-hours"></td>
-        </tr>
-    }
-    
-</tbody>
+        @for (int i = 0; i < 7; i++)
+        {
+            <tr>
+                <td>
+                    <div>
+                        <label>From:</label>
+                        <input type="date" name="fromDate" class="from-date" />
+                        <br />
+                        <label>To:</label>
+                        <input type="date" name="toDate" class="to-date" readonly />
+                    </div>
+                </td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td class="total-hours"></td>
+            </tr>
+        }
+    </tbody>
 </table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to set 'To Date' based on 'From Date'
+        function updateToDate(fromDateInput) {
+            const fromDate = new Date(fromDateInput.value);
+            if (!isNaN(fromDate.getTime())) {
+                const toDate = new Date(fromDate);
+                toDate.setDate(fromDate.getDate() + 6); // Set 'To Date' to a week later
+
+                // Format date to YYYY-MM-DD
+                const formatDate = (date) => date.toISOString().split('T')[0];
+                const toDateInput = fromDateInput.closest('td').querySelector('.to-date');
+
+                if (toDateInput) {
+                    toDateInput.value = formatDate(toDate);
+                }
+            }
+        }
+
+        // Attach event listener to 'From Date' inputs
+        document.querySelectorAll('.from-date').forEach(input => {
+            input.addEventListener('input', function () {
+                updateToDate(this);
+            });
+        });
+    });
+</script>
+
 <div class="button-container">
     <button type="button" onclick="submitTimesheet()">Submit</button>
     <button type="button" class="reset" onclick="resetTable()">Reset</button>
@@ -150,11 +186,11 @@
             total += hours;
         });
 
-        if (total > 24) {
-            alert("Total hours for a day cannot exceed 24 hours.");
-            row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = ''); // Clear all cells
-            total = 0;
-        }
+        // if (total > 24) {
+        //     alert("Total hours for a day cannot exceed 24 hours.");
+        //     row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = ''); // Clear all cells
+        //     total = 0;
+        // }
 
         row.querySelector('.total-hours').textContent = total.toFixed(2);
     }

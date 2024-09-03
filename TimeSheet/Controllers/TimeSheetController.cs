@@ -1,10 +1,7 @@
-﻿// Controllers/TimesheetController.cs
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using TimeSheet.Models;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TimeSheet.Models;
 
 namespace TimeSheet.Controllers
 {
@@ -17,103 +14,52 @@ namespace TimeSheet.Controllers
             _context = context;
         }
 
-        // GET: Timesheet
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Timesheets.ToListAsync());
-        }
-
-        // GET: Timesheet/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Timesheet/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Date,Project,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TotalHours")] Timesheet timesheet)
+        public async Task<IActionResult> SaveTimesheet([FromBody] Timesheet[] entries)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(timesheet);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(timesheet);
-        }
+            if (entries == null || !entries.Any())
+                return BadRequest("No entries provided.");
 
-        // GET: Timesheet/Edit/5
-        public async Task<IActionResult> Edit(int id)
-        {
-            var timesheet = await _context.Timesheets.FindAsync(id);
-            if (timesheet == null)
+            // Save or update entries
+            foreach (var entry in entries)
             {
-                return NotFound();
-            }
-            return View(timesheet);
-        }
-
-        // POST: Timesheet/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,Project,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TotalHours")] Timesheet timesheet)
-        {
-            if (id != timesheet.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                var existingEntry = _context.Timesheets
+                                             .FirstOrDefault(e => e.Date == entry.Date && e.Project == entry.Project);
+                if (existingEntry != null)
                 {
-                    _context.Update(timesheet);
-                    await _context.SaveChangesAsync();
+                    // Update existing entry
+                    existingEntry.Date = entry.Date;
+                    existingEntry.Monday = entry.Monday;
+                    existingEntry.Tuesday = entry.Tuesday;
+                    existingEntry.Wednesday = entry.Wednesday;
+                    existingEntry.Thursday = entry.Thursday;
+                    existingEntry.Friday = entry.Friday;
+                    existingEntry.Saturday = entry.Saturday;
+                    existingEntry.Sunday = entry.Sunday;
+                    existingEntry.TotalHours = entry.TotalHours;
+                    _context.Timesheets.Update(existingEntry);
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!TimesheetExists(timesheet.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // Create new entry
+                    _context.Timesheets.Add(entry);
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(timesheet);
-        }
-
-        // GET: Timesheet/Delete/5
-        public async Task<IActionResult> Delete(int id)
-        {
-            var timesheet = await _context.Timesheets
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (timesheet == null)
-            {
-                return NotFound();
             }
 
-            return View(timesheet);
-        }
-
-        // POST: Timesheet/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var timesheet = await _context.Timesheets.FindAsync(id);
-            _context.Timesheets.Remove(timesheet);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Json(new { success = true });
         }
 
-        private bool TimesheetExists(int id)
+        [HttpPost]
+        public async Task<IActionResult> DeleteTimesheet(int id)
         {
-            return _context.Timesheets.Any(e => e.Id == id);
+            var entry = await _context.Timesheets.FindAsync(id);
+            if (entry != null)
+            {
+                _context.Timesheets.Remove(entry);
+                await _context.SaveChangesAsync();
+            }
+            return Json(new { success = true });
         }
     }
 }
