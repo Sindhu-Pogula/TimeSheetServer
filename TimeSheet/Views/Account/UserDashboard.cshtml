@@ -86,8 +86,7 @@
         <span class="form-control-plaintext">@Model.Email</span>
         <input type="hidden" asp-for="Email" />
         <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    
+    </div>   
 
 </form>
 
@@ -137,40 +136,51 @@
     function updateTotalHours(row) {
         let total = 0;
         let isValid = true;
-        row.querySelectorAll('td[contenteditable="true"]:not(:first-child):not(:nth-child(2))').forEach(cell => {
+
+        row.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
             const hours = parseFloat(cell.textContent) || 0;
-            if (hours < 0 || hours > 24) {
-                alert("Please enter hours between 0 and 24.");
+
+            if (isNaN(hours) || hours < 0 || hours > 24) {
+                alert("Please enter a valid number between 0 and 24.");
                 cell.textContent = ''; // Clear invalid entry
                 isValid = false;
                 return;
             }
+
             total += hours;
         });
+
         if (total > 24) {
             alert("Total hours for a day cannot exceed 24 hours.");
             row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = ''); // Clear all cells
             total = 0;
         }
+
         row.querySelector('.total-hours').textContent = total.toFixed(2);
     }
 
     // Attach input event to each editable cell
-    document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+    document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
         cell.addEventListener('input', function () {
+            // Check if the input contains non-numeric characters except decimal point
+            if (/[^0-9.]/.test(this.textContent)) {
+                alert("Please enter only numbers.");
+                this.textContent = this.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+            }
             updateTotalHours(this.parentElement);
         });
     });
 
+    // Function to submit the timesheet
     function submitTimesheet() {
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
 
         rows.forEach(row => {
             const date = row.querySelector('input[type="date"]').value;
-            const project = row.cells[1].textContent;
+            const project = row.cells[1].textContent.trim();
             const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
-            const totalHours = row.querySelector('.total-hours').textContent;
+            const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
 
             if (date && project && totalHours > 0) {
                 data.push({ date, project, hours, totalHours });
@@ -191,6 +201,7 @@
             });
     }
 
+    // Function to reset the table
     function resetTable() {
         const rows = document.querySelectorAll('tbody tr');
         rows.forEach(row => {
