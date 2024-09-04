@@ -30,7 +30,8 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Date.ToShortDateString()</td>
+                <td>@item.FromDate.ToShortDateString()</td>
+                <td>@item.ToDate.ToShortDateString()</td>
                 <td>@item.Project</td>
                 <td>@item.Monday</td>
                 <td>@item.Tuesday</td>

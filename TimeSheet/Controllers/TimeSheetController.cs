@@ -2,6 +2,7 @@
 using TimeSheet.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace TimeSheet.Controllers
 {
@@ -20,15 +21,16 @@ namespace TimeSheet.Controllers
             if (entries == null || !entries.Any())
                 return BadRequest("No entries provided.");
 
-            // Save or update entries
             foreach (var entry in entries)
             {
-                var existingEntry = _context.Timesheets
-                                             .FirstOrDefault(e => e.Date == entry.Date && e.Project == entry.Project);
+                // Assuming 'Date' and 'Project' together form a unique identifier for a Timesheet entry
+                var existingEntry = await _context.Timesheets
+                                                  .FirstOrDefaultAsync(e => e.FromDate == entry.FromDate && e.ToDate ==entry.ToDate&& e.Project == entry.Project);
                 if (existingEntry != null)
                 {
                     // Update existing entry
-                    existingEntry.Date = entry.Date;
+                    existingEntry.FromDate = entry.FromDate;
+                    existingEntry.ToDate = entry.ToDate;
                     existingEntry.Monday = entry.Monday;
                     existingEntry.Tuesday = entry.Tuesday;
                     existingEntry.Wednesday = entry.Wednesday;

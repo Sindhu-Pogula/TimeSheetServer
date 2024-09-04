@@ -9,34 +9,37 @@ namespace TimeSheet.Models
         public int Id { get; set; }
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime FromDate { get; set; }
 
+       [Required]
+        public DateTime ToDate { get; set; }
+        
         [Required]
         [StringLength(100)]
         public string Project { get; set; }
 
         [Range(0, 24)]
-        public float Monday { get; set; }
+        public decimal Monday { get; set; }
 
         [Range(0, 24)]
-        public float Tuesday { get; set; }
+        public decimal Tuesday { get; set; }
 
         [Range(0, 24)]
-        public float Wednesday { get; set; }
+        public decimal Wednesday { get; set; }
 
         [Range(0, 24)]
-        public float Thursday { get; set; }
+        public decimal Thursday { get; set; }
 
         [Range(0, 24)]
-        public float Friday { get; set; }
+        public decimal Friday { get; set; }
 
         [Range(0, 24)]
-        public float Saturday { get; set; }
+        public decimal Saturday { get; set; }
 
         [Range(0, 24)]
-        public float Sunday { get; set; }
+        public decimal Sunday { get; set; }
 
         [Range(0, 24)]
-        public float TotalHours { get; set; }
+        public decimal TotalHours { get; set; }
     }
 }

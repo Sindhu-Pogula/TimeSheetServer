@@ -86,7 +86,7 @@
         <span class="form-control-plaintext">@Model.Email</span>
         <input type="hidden" asp-for="Email" />
         <span asp-validation-for="Email" class="text-danger"></span>
-    </div>   
+    </div>
 
 </form>
 
@@ -117,7 +117,7 @@
                         <input type="date" name="fromDate" class="from-date" />
                         <br />
                         <label>To:</label>
-                        <input type="date" name="toDate" class="to-date" readonly />
+                        <input type="date" name="toDate" class="to-date" />
                     </div>
                 </td>
                 <td contenteditable="true"></td>
@@ -139,7 +139,7 @@
         // Function to set 'To Date' based on 'From Date'
         function updateToDate(fromDateInput) {
             const fromDate = new Date(fromDateInput.value);
-            if (!isNaN(fromDate.getTime())) { 
+            if (!isNaN(fromDate.getTime())) {
                 const toDate = new Date(fromDate);
                 toDate.setDate(fromDate.getDate() + 6); // Set 'To Date' to a week later
 
@@ -186,12 +186,6 @@
             total += hours;
         });
 
-        // if (total > 24) {
-        //     alert("Total hours for a day cannot exceed 24 hours.");
-        //     row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = ''); // Clear all cells
-        //     total = 0;
-        // }
-
         row.querySelector('.total-hours').textContent = total.toFixed(2);
     }
 
@@ -207,43 +201,59 @@
         });
     });
 
-    // Function to submit the timesheet
     function submitTimesheet() {
-        const rows = document.querySelectorAll('tbody tr');
-        const data = [];
+    const rows = document.querySelectorAll('tbody tr');
+    const data = [];
 
-        rows.forEach(row => {
-            const date = row.querySelector('input[type="date"]').value;
-            const project = row.cells[1].textContent.trim();
-            const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
-            const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
+    rows.forEach(row => {
+        const fromDate = row.querySelector('input[name="fromDate"]').value;
+        const toDate = row.querySelector('input[name="toDate"]').value;
+        const project = row.cells[1].textContent.trim();
+        const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
+        const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
 
-            if (date && project && totalHours > 0) {
-                data.push({ date, project, hours, totalHours });
-            }
-        });
-
-        fetch('/Timesheet/SaveTimesheet', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        }).then(response => response.json())
-            .then(result => {
-                console.log('Success:', result);
-            }).catch(error => {
-                console.error('Error:', error);
+        // Ensure all relevant data is captured
+        if (fromDate && toDate && project && totalHours > 0) {
+            data.push({
+                fromDate, 
+                toDate, 
+                project, 
+                hours: {
+                    Monday: hours[0],
+                    Tuesday: hours[1],
+                    Wednesday: hours[2],
+                    Thursday: hours[3],
+                    Friday: hours[4],
+                    Saturday: hours[5],
+                    Sunday: hours[6]
+                },
+                totalHours
             });
-    }
+        }
+    });
+
+    // Send the data to the server
+    fetch('/Timesheet/SaveTimesheet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    }).then(response => response.json())
+        .then(result => {
+            console.log('Success:', result);
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+}
 
     // Function to reset the table
     function resetTable() {
         const rows = document.querySelectorAll('tbody tr');
         rows.forEach(row => {
             row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = '');
-            row.querySelector('input[type="date"]').value = '';
-            row.querySelector('.total-hours').textContent = '';
+            row.querySelectorAll('input[type="date"]').forEach(input => input.value = ''); // Reset both "From Date" and "To Date"
+            row.querySelector('.total-hours').textContent = ''; // Reset total hours
         });
     }
 </script>

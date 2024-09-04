@@ -12,8 +12,8 @@ using TimeSheet.Models;
 namespace TimeSheet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240902074645_initialcreate")]
-    partial class initialcreate
+    [Migration("20240904092603_initialcreator")]
+    partial class initialcreator
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,11 @@ namespace TimeSheet.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
                     b.Property<float>("Friday")
                         .HasColumnType("real");
+
+                    b.Property<DateTime>("FromDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<float>("Monday")
                         .HasColumnType("real");
@@ -55,6 +55,9 @@ namespace TimeSheet.Migrations
 
                     b.Property<float>("Thursday")
                         .HasColumnType("real");
+
+                    b.Property<DateTime>("ToDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<float>("TotalHours")
                         .HasColumnType("real");
