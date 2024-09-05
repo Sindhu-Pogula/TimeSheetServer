@@ -217,17 +217,15 @@
             data.push({
                 fromDate, 
                 toDate, 
-                project, 
-                hours: {
-                    Monday: hours[0],
-                    Tuesday: hours[1],
-                    Wednesday: hours[2],
-                    Thursday: hours[3],
-                    Friday: hours[4],
-                    Saturday: hours[5],
-                    Sunday: hours[6]
-                },
-                totalHours
+                project,
+                    Monday: hours[0],      // Monday hours directly
+                    Tuesday: hours[1],     // Tuesday hours directly
+                    Wednesday: hours[2],   // Wednesday hours directly
+                    Thursday: hours[3],    // Thursday hours directly
+                    Friday: hours[4],      // Friday hours directly
+                    Saturday: hours[5],    // Saturday hours directly
+                    Sunday: hours[6],
+                    totalHours
             });
         }
     });

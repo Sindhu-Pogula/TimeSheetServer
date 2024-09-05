@@ -23,14 +23,15 @@ namespace TimeSheet.Controllers
 
             foreach (var entry in entries)
             {
+                Console.WriteLine($"Saving entry: {entry.Project}, {entry.Monday}, {entry.Tuesday}, {entry.Wednesday}, {entry.Thursday}, {entry.Friday}, {entry.Saturday}, {entry.Sunday}");
                 // Assuming 'Date' and 'Project' together form a unique identifier for a Timesheet entry
                 var existingEntry = await _context.Timesheets
                                                   .FirstOrDefaultAsync(e => e.FromDate == entry.FromDate && e.ToDate ==entry.ToDate&& e.Project == entry.Project);
                 if (existingEntry != null)
                 {
                     // Update existing entry
-                    existingEntry.FromDate = entry.FromDate;
-                    existingEntry.ToDate = entry.ToDate;
+                    //existingEntry.FromDate = entry.FromDate;
+                    //existingEntry.ToDate = entry.ToDate;
                     existingEntry.Monday = entry.Monday;
                     existingEntry.Tuesday = entry.Tuesday;
                     existingEntry.Wednesday = entry.Wednesday;
