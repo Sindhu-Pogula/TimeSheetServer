@@ -12,8 +12,8 @@ using TimeSheet.Models;
 namespace TimeSheet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240904092603_initialcreator")]
-    partial class initialcreator
+    [Migration("20240905084341_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,40 +33,40 @@ namespace TimeSheet.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<float>("Friday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Friday")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("FromDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<float>("Monday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Monday")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Project")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<float>("Saturday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Saturday")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("Sunday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Sunday")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("Thursday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Thursday")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ToDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<float>("TotalHours")
-                        .HasColumnType("real");
+                    b.Property<decimal>("TotalHours")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("Tuesday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Tuesday")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("Wednesday")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Wednesday")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
