@@ -105,6 +105,18 @@
     tbody tr:hover {
         background-color: #f1f1f1;
     }
+    .action-buttons{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .history-icon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
 </style>
 
 <form asp-action="Signup" method="post">
@@ -195,10 +207,19 @@
     });
 </script>
 
+<div class="action-buttons">
+    <div class="button-container">
+        <a href="/Timesheet/History" class="btn btn-primary history-icon">
+            <i class="fa fa-history"></i>View Timesheet History
+        </a>
+    </div>
 <div class="button-container">
     <button type="button" onclick="submitTimesheet()">Submit</button>
     <button type="button" class="reset" onclick="resetTable()">Reset</button>
 </div>
+</div>
+
+
 
 <script>
     // Function to update the total hours for a row
@@ -289,6 +310,4 @@
     }
 
 </script>
-<div class="button-container">
-    <a href="/Timesheet/History" class="btn btn-primary">View Timesheet History</a>
-</div>
+
