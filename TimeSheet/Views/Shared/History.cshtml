@@ -1,0 +1,71 @@
+﻿@model IEnumerable<TimeSheet.Models.Timesheet>
+
+<h2>Timesheet History</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Project</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model)
+        {
+            <tr>
+                <td>@entry.FromDate.ToString("yyyy-MM-dd")</td>
+                <td>@entry.ToDate.ToString("yyyy-MM-dd")</td>
+                <td>@entry.Project</td>
+                <td>@entry.Monday</td>
+                <td>@entry.Tuesday</td>
+                <td>@entry.Wednesday</td>
+                <td>@entry.Thursday</td>
+                <td>@entry.Friday</td>
+                <td>@entry.Saturday</td>
+                <td>@entry.Sunday</td>
+                <td>@entry.TotalHours</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: left;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    thead tr {
+        background-color: #4CAF50;
+        color: white;
+        text-align: left;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>

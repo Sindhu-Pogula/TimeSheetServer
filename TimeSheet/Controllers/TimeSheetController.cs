@@ -64,5 +64,11 @@ namespace TimeSheet.Controllers
             }
             return Json(new { success = true });
         }
+        public async Task<IActionResult> History()
+        {
+            var timesheetHistory = await _context.Timesheets.ToListAsync();
+            return View(timesheetHistory);
+        }
+
     }
 }

@@ -74,6 +74,39 @@
             }
 </style>
 
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: left;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    thead tr {
+        background-color: #4CAF50;
+        color: white;
+        text-align: left;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+
 <form asp-action="Signup" method="post">
     <div class="form-group">
         <label asp-for="Username" class="control-label">Username:</label>
@@ -202,22 +235,22 @@
     });
 
     function submitTimesheet() {
-    const rows = document.querySelectorAll('tbody tr');
-    const data = [];
+        const rows = document.querySelectorAll('tbody tr');
+        const data = [];
 
-    rows.forEach(row => {
-        const fromDate = row.querySelector('input[name="fromDate"]').value;
-        const toDate = row.querySelector('input[name="toDate"]').value;
-        const project = row.cells[1].textContent.trim();
-        const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
-        const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
+        rows.forEach(row => {
+            const fromDate = row.querySelector('input[name="fromDate"]').value;
+            const toDate = row.querySelector('input[name="toDate"]').value;
+            const project = row.cells[1].textContent.trim();
+            const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
+            const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
 
-        // Ensure all relevant data is captured
-        if (fromDate && toDate && project && totalHours > 0) {
-            data.push({
-                fromDate, 
-                toDate, 
-                project,
+            // Ensure all relevant data is captured
+            if (fromDate && toDate && project && totalHours > 0) {
+                data.push({
+                    fromDate,
+                    toDate,
+                    project,
                     Monday: hours[0],      // Monday hours directly
                     Tuesday: hours[1],     // Tuesday hours directly
                     Wednesday: hours[2],   // Wednesday hours directly
@@ -226,24 +259,24 @@
                     Saturday: hours[5],    // Saturday hours directly
                     Sunday: hours[6],
                     totalHours
-            });
-        }
-    });
-
-    // Send the data to the server
-    fetch('/Timesheet/SaveTimesheet', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    }).then(response => response.json())
-        .then(result => {
-            console.log('Success:', result);
-        }).catch(error => {
-            console.error('Error:', error);
+                });
+            }
         });
-}
+
+        // Send the data to the server
+        fetch('/Timesheet/SaveTimesheet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(result => {
+                console.log('Success:', result);
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+    }
 
     // Function to reset the table
     function resetTable() {
@@ -254,4 +287,8 @@
             row.querySelector('.total-hours').textContent = ''; // Reset total hours
         });
     }
+
 </script>
+<div class="button-container">
+    <a href="/Timesheet/History" class="btn btn-primary">View Timesheet History</a>
+</div>
