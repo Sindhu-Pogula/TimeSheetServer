@@ -72,46 +72,18 @@
             .button-container button.reset {
                 background-color: #f44336; /* Red */
             }
-</style>
 
-
-<style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        font-size: 16px;
-        text-align: left;
-        background-color: #fff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    .date-container {
+        display: grid;
     }
 
-    thead tr {
-        background-color: #4CAF50;
-        color: white;
-        text-align: left;
-    }
-
-    th, td {
-        padding: 12px 15px;
-        border: 1px solid #ddd;
-        text-align: center;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-    .action-buttons{
+    .action-buttons {
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
 
-    .history-icon{
+    .history-icon {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -157,11 +129,11 @@
         {
             <tr>
                 <td>
-                    <div>
-                        <label>From:</label>
+                    <div class="date-container">
+                        <label><b>From:</b></label>
                         <input type="date" name="fromDate" class="from-date" autocomplete="off" />
                         <br />
-                        <label>To:</label>
+                        <label><b>To:</b></label>
                         <input type="date" name="toDate" class="to-date" autocomplete="off" />
                     </div>
                 </td>

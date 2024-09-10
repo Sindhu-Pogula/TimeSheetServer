@@ -3,6 +3,7 @@ using TimeSheet.Models;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace TimeSheet.Controllers
 {
@@ -69,6 +70,27 @@ namespace TimeSheet.Controllers
             var timesheetHistory = await _context.Timesheets.ToListAsync();
             return View(timesheetHistory);
         }
+        public async Task<IActionResult> DownloadTimesheet()
+        {
+            // Fetch timesheet data
+            var timesheets = await _context.Timesheets.ToListAsync();
 
+            // Create CSV content
+            var csv = new StringBuilder();
+            csv.AppendLine("FromDate,ToDate,Project,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TotalHours");
+
+            foreach (var entry in timesheets)
+            {
+                csv.AppendLine($"{entry.FromDate},{entry.ToDate},{entry.Project},{entry.Monday},{entry.Tuesday},{entry.Wednesday},{entry.Thursday},{entry.Friday},{entry.Saturday},{entry.Sunday},{entry.TotalHours}");
+            }
+
+            // Convert CSV content to byte array
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+
+            // Return CSV file for download
+            return File(bytes, "text/csv", "TimesheetData.csv");
+        }
     }
+
 }
+

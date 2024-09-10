@@ -1,46 +1,4 @@
 ﻿@model IEnumerable<TimeSheet.Models.Timesheet>
-
-<h2>Timesheet History</h2>
-
-<table>
-    <thead>
-        <tr>
-            <th>From Date</th>
-            <th>To Date</th>
-            <th>Project</th>
-            <th>Monday</th>
-            <th>Tuesday</th>
-            <th>Wednesday</th>
-            <th>Thursday</th>
-            <th>Friday</th>
-            <th>Saturday</th>
-            <th>Sunday</th>
-            <th>Total Hours</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var entry in Model)
-        {
-            <tr>
-                <td>@entry.FromDate.ToString("yyyy-MM-dd")</td>
-                <td>@entry.ToDate.ToString("yyyy-MM-dd")</td>
-                <td>@entry.Project</td>
-                <td>@entry.Monday</td>
-                <td>@entry.Tuesday</td>
-                <td>@entry.Wednesday</td>
-                <td>@entry.Thursday</td>
-                <td>@entry.Friday</td>
-                <td>@entry.Saturday</td>
-                <td>@entry.Sunday</td>
-                <td>@entry.TotalHours</td>
-            </tr>
-        }
-    </tbody>
-</table>
-<div class="button-container">
-    <a href="/Account/UserDashboard" class="btn btn-primary">Back to Dashboard</a>
-</div>
-
 <style>
     table {
         width: 100%;
@@ -93,4 +51,50 @@
             .button-container a:hover {
                 background-color: #45a049;
             }
+
+    .download-timesheet {
+        height: 2.7rem;
+    }
 </style>
+<h2>Timesheet History</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>From Date</th>
+            <th>To Date</th>
+            <th>Project</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model)
+        {
+            <tr>
+                <td>@entry.FromDate.ToString("yyyy-MM-dd")</td>
+                <td>@entry.ToDate.ToString("yyyy-MM-dd")</td>
+                <td>@entry.Project</td>
+                <td>@entry.Monday</td>
+                <td>@entry.Tuesday</td>
+                <td>@entry.Wednesday</td>
+                <td>@entry.Thursday</td>
+                <td>@entry.Friday</td>
+                <td>@entry.Saturday</td>
+                <td>@entry.Sunday</td>
+                <td>@entry.TotalHours</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="button-container">
+    <a href="/Account/UserDashboard" class="btn btn-primary">Back to Dashboard</a>
+    <button type="button" class="btn btn-secondary download-timesheet" onclick="window.location.href='@Url.Action("DownloadTimesheet", "Timesheet")'">Download File</button>
+
+</div>

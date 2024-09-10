@@ -12,8 +12,8 @@ using TimeSheet.Models;
 namespace TimeSheet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240905084341_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240910072524_inialcreators")]
+    partial class inialcreators
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
