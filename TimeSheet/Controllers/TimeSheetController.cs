@@ -65,11 +65,47 @@ namespace TimeSheet.Controllers
             }
             return Json(new { success = true });
         }
-        public async Task<IActionResult> History()
+        //public async Task<IActionResult> History(string searchQuery)
+        //{
+        //    var timesheets = _context.Timesheets.AsQueryable();
+
+        //    if (!string.IsNullOrEmpty(searchQuery))
+        //    {
+        //        DateTime fromDate;
+        //        DateTime toDate;
+
+        //        if (DateTime.TryParse(searchQuery, out fromDate))
+        //        {
+        //            timesheets = timesheets.Where(t => t.FromDate.Date == fromDate.Date || t.ToDate.Date == fromDate.Date);
+        //        }
+        //        else if (DateTime.TryParse(searchQuery, out toDate))
+        //        {
+        //            timesheets = timesheets.Where(t => t.ToDate.Date == toDate.Date);
+        //        }
+        //        else
+        //        {
+        //            timesheets = timesheets.Where(t => t.Project.Contains(searchQuery));
+        //        }
+        //    }
+
+        //    var filteredTimesheets = await timesheets.ToListAsync();
+        //    return View(filteredTimesheets);
+        //}
+        public async Task<IActionResult> History(string searchQuery)
         {
-            var timesheetHistory = await _context.Timesheets.ToListAsync();
+            var timesheetHistory = await _context.Timesheets
+                .Where(t => string.IsNullOrEmpty(searchQuery) ||
+                            t.FromDate.ToString().Contains(searchQuery) ||
+                            t.ToDate.ToString().Contains(searchQuery) ||
+                            t.Project.Contains(searchQuery))
+                .ToListAsync();
+
+            ViewData["SearchQuery"] = searchQuery;
+
             return View(timesheetHistory);
         }
+
+
         public async Task<IActionResult> DownloadTimesheet()
         {
             // Fetch timesheet data

@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<TimeSheet.Models.Timesheet>
+
 <style>
     table {
         width: 100%;
@@ -55,9 +56,80 @@
     .download-timesheet {
         height: 2.7rem;
     }
+
+    
+    .no-records {
+        margin-top: 20px;
+        color: #999;
+        font-style: italic;
+    }
+
+    .form-container{
+        display:flex;
+    } 
+    .search-wrapper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+        max-width: 25rem;
+        background-color: #fff;
+    }
+
+    .search-input {
+        flex: 1;
+        width: 21rem;
+        border: none;
+        padding: 10px;
+        font-size: 16px;
+        outline: none;
+        border-radius: 4px 0 0 4px;
+    }
+
+    .icon-container {
+        display: flex;
+        align-items: center;
+        background-color: #eee;
+        border-left: 1px solid #ccc;
+        padding-right: 5px;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .search-icon, .cancel-icon {
+        cursor: pointer;
+        padding: 10px;
+    }
+
+        .search-icon i, .cancel-icon i {
+            font-size: 16px;
+        }
+
+    .cancel-icon {
+        display: none; /* Hide by default */
+    }
+
+    /* Show or hide the cancel icon based on input value */
+    .search-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
 </style>
 <h2>Timesheet History</h2>
 
+<div class="search-container">
+    <form id="searchForm" method="get" asp-controller="Timesheet" asp-action="History" class="form-container">
+        <input type="text" id="searchInput" name="searchQuery" class="search-input" placeholder="Search with From Date or To Date or Project" value="@ViewData["SearchQuery"]" />
+        <div class="search-icon" onclick="searchTimesheet()">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="cancel-icon" onclick="clearSearch()">
+            <i class="fas fa-times"></i>
+        </div>
+    </form>
+</div>    
 <table>
     <thead>
         <tr>
@@ -75,26 +147,91 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var entry in Model)
+            {
+                <tr>
+                    <td>@entry.FromDate.ToShortDateString()</td>
+                    <td>@entry.ToDate.ToShortDateString()</td>
+                    <td>@entry.Project</td>
+                    <td>@entry.Monday</td>
+                    <td>@entry.Tuesday</td>
+                    <td>@entry.Wednesday</td>
+                    <td>@entry.Thursday</td>
+                    <td>@entry.Friday</td>
+                    <td>@entry.Saturday</td>
+                    <td>@entry.Sunday</td>
+                    <td>@entry.TotalHours</td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@entry.FromDate.ToString("yyyy-MM-dd")</td>
-                <td>@entry.ToDate.ToString("yyyy-MM-dd")</td>
-                <td>@entry.Project</td>
-                <td>@entry.Monday</td>
-                <td>@entry.Tuesday</td>
-                <td>@entry.Wednesday</td>
-                <td>@entry.Thursday</td>
-                <td>@entry.Friday</td>
-                <td>@entry.Saturday</td>
-                <td>@entry.Sunday</td>
-                <td>@entry.TotalHours</td>
+                <td colspan="11" class="no-records">No records found</td>
             </tr>
         }
     </tbody>
 </table>
 <div class="button-container">
     <a href="/Account/UserDashboard" class="btn btn-primary">Back to Dashboard</a>
-    <button type="button" class="btn btn-secondary download-timesheet" onclick="window.location.href='@Url.Action("DownloadTimesheet", "Timesheet")'">Download File</button>
 
+    @if (Model != null && Model.Any())
+    {
+        <button type="button" class="btn btn-secondary download-timesheet" onclick="window.location.href='@Url.Action("DownloadTimesheet", "Timesheet")'">Download File</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-secondary download-timesheet" disabled>Download File</button>
+    }
 </div>
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const cancelIcon = document.querySelector('.cancel-icon');
+
+    // Show or hide the cancel button based on the input value
+    searchInput.addEventListener('input', function () {
+        if (searchInput.value.trim() !== '') {
+            cancelIcon.style.display = 'block'; // Show cancel icon if input is not empty
+        } else {
+            cancelIcon.style.display = 'none'; // Hide cancel icon if input is empty
+        }
+    });
+
+    // Handle Enter key press to trigger search
+    searchInput.addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent default form submission
+            searchTimesheet();
+        }
+    });
+
+    // Function to trigger timesheet search
+    function searchTimesheet() {
+        var query = searchInput.value;
+        var form = document.getElementById('searchForm');
+        var action = form.action;
+        var queryString = new URLSearchParams(window.location.search);
+        queryString.set('searchQuery', query);
+        form.action = action.split('?')[0] + '?' + queryString.toString();
+        form.submit();
+    }
+
+    // Clear the search input and submit the form
+    function clearSearch() {
+        searchInput.value = ''; // Clear the input field
+        cancelIcon.style.display = 'none'; // Hide cancel icon
+        searchTimesheet(); // Submit the form with an empty search query
+    }
+
+    // Ensure the cancel button is visible after a search
+    document.addEventListener('DOMContentLoaded', function () {
+        if (searchInput.value.trim() !== '') {
+            cancelIcon.style.display = 'block'; // Show cancel icon if input is not empty
+        } else {
+            cancelIcon.style.display = 'none'; // Hide cancel icon on page load if input is empty
+        }
+    });
+
+</script>
