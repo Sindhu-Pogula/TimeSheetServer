@@ -200,25 +200,47 @@
         let isValid = true;
 
         row.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
-            const hours = parseFloat(cell.textContent) || 0;
+            let content = cell.textContent.trim();
+            let [hours, minutes] = content.split('.').map(Number); // Split hours and minutes
 
             if (isNaN(hours) || hours < 0 || hours > 24) {
-                alert("Please enter a valid number between 0 and 24.");
+                alert("Please enter a valid number between 0 and 24 for hours.");
                 cell.textContent = ''; // Clear invalid entry
                 isValid = false;
                 return;
             }
 
-            total += hours;
+            if (minutes && (minutes < 0 || minutes >= 60)) {
+                alert("Minutes should be between 0 and 59.");
+                cell.textContent = ''; // Clear invalid minutes
+                isValid = false;
+                return;
+            }
+
+            // Convert hours and minutes into a decimal representation for total calculation
+            const decimalHours = hours + (minutes ? (minutes / 60) : 0);
+            total += decimalHours;
         });
 
-        row.querySelector('.total-hours').textContent = total.toFixed(2);
+        if (isValid) {
+            row.querySelector('.total-hours').textContent = total.toFixed(2);
+        }
     }
 
+
     // Attach input event to each editable cell
+    // document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
+    //     cell.addEventListener('input', function () {
+    //         // Check if the input contains non-numeric characters except decimal point
+    //         if (/[^0-9.]/.test(this.textContent)) {
+    //             alert("Please enter only numbers.");
+    //             this.textContent = this.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+    //         }
+    //         updateTotalHours(this.parentElement);
+    //     });
+    // });
     document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
         cell.addEventListener('input', function () {
-            // Check if the input contains non-numeric characters except decimal point
             if (/[^0-9.]/.test(this.textContent)) {
                 alert("Please enter only numbers.");
                 this.textContent = this.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
@@ -226,6 +248,7 @@
             updateTotalHours(this.parentElement);
         });
     });
+
 
     function submitTimesheet() {
         const rows = document.querySelectorAll('tbody tr');
