@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TimeSheet.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class inintiater11 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
