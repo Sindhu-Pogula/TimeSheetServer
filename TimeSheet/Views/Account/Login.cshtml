@@ -104,6 +104,14 @@ button[type="submit"]:hover {
     color: #dc3545;
 }
 </style>
+
+
+<!-- Display validation summary for error messages -->
+    @* This will display any error message set in the controller *@
+@* <div>
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+</div> *@
+
 <form asp-action="Login" method="post">
     <div class="form-group">
         <label asp-for="Username" class="control-label"></label>
@@ -121,4 +129,3 @@ button[type="submit"]:hover {
         <button type="submit" class="btn btn-primary">Login</button>
     </div>
 </form>
-

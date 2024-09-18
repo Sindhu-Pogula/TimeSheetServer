@@ -58,23 +58,35 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<ActionResult> Login(string username, string password)
     {
-        // Validate the user (simple check for demonstration)
-        var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username && u.Password == password);
+        // Find the user by username
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
 
         if (user != null)
         {
-            // Store user in session (simplified example)
-            HttpContext.Session.SetString("Username", user.Username);
+            // Check if the password is correct
+            if (user.Password == password)
+            {
+                // Store user in session
+                HttpContext.Session.SetString("Username", user.Username);
 
-            // Redirect to the UserDashboard if the login is successful
-            return RedirectToAction("UserDashboard");
+                // Redirect to the UserDashboard if the login is successful
+                return RedirectToAction("UserDashboard");
+            }
+            else
+            {
+                // Add an error for incorrect password
+                ModelState.AddModelError("Password", "Invalid password.");
+            }
+        }
+        else
+        {
+            // Optionally, show an error for username not found
+            ModelState.AddModelError("Username", "Username not found.");
         }
 
-        // Invalid login attempt
-        ModelState.AddModelError("", "Invalid username or password.");
+        // Return the view with errors
         return View();
     }
-
     // GET: Account/UserDashboard
     public ActionResult UserDashboard()
     {
