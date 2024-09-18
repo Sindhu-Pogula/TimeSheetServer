@@ -203,14 +203,16 @@
             let content = cell.textContent.trim();
             let [hours, minutes] = content.split('.').map(Number); // Split hours and minutes
 
+            // Validate hours (should not exceed 24)
             if (isNaN(hours) || hours < 0 || hours > 24) {
-                alert("Please enter a valid number between 0 and 24 for hours.");
+                alert("Hours should be between 0 and 24.");
                 cell.textContent = ''; // Clear invalid entry
                 isValid = false;
                 return;
             }
 
-            if (minutes && (minutes < 0 || minutes >= 60)) {
+            // Validate minutes (should be between 0 and 59)
+            if (minutes !== undefined && (isNaN(minutes) || minutes < 0 || minutes >= 60)) {
                 alert("Minutes should be between 0 and 59.");
                 cell.textContent = ''; // Clear invalid minutes
                 isValid = false;
@@ -227,18 +229,6 @@
         }
     }
 
-
-    // Attach input event to each editable cell
-    // document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
-    //     cell.addEventListener('input', function () {
-    //         // Check if the input contains non-numeric characters except decimal point
-    //         if (/[^0-9.]/.test(this.textContent)) {
-    //             alert("Please enter only numbers.");
-    //             this.textContent = this.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
-    //         }
-    //         updateTotalHours(this.parentElement);
-    //     });
-    // });
     document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
         cell.addEventListener('input', function () {
             if (/[^0-9.]/.test(this.textContent)) {
