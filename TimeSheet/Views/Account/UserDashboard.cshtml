@@ -253,33 +253,61 @@
     function submitTimesheet() {
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
+        let isAnyRowValid = false;  // Track if at least one valid row exists
 
-        rows.forEach(row => {
+        rows.forEach((row, index) => {
             const fromDate = row.querySelector('input[name="fromDate"]').value;
             const toDate = row.querySelector('input[name="toDate"]').value;
             const project = row.cells[1].textContent.trim();
-            const hours = Array.from(row.cells).slice(2, -1).map(cell => parseFloat(cell.textContent) || 0);
             const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
 
-            // Ensure all relevant data is captured
-            if (fromDate && toDate && project && totalHours > 0) {
+            // Logging to inspect values
+            console.log(`Row ${index + 1}:`);
+            console.log("From Date: ", fromDate);
+            console.log("To Date: ", toDate);
+            console.log("Project: ", project);
+            console.log("Total Hours: ", totalHours);
+
+            // Check if the row has partial or full data
+            const isRowEmpty = !fromDate && !toDate && !project && totalHours === 0;
+            const isRowValid = fromDate && toDate && project && totalHours > 0;
+
+            if (!isRowEmpty && !isRowValid) {
+                // If the row is not empty but not valid, show an alert for that row
+                console.log(`Row ${index + 1} is invalid. Please fill all required details.`);
+                alert(`Please fill all required details in row ${index + 1}. Ensure dates, project, and hours are correctly filled.`);
+                return;  // Stop the submission on the first invalid row
+            }
+
+            if (isRowValid) {
+                // If the row is valid, push the data to the array
                 data.push({
                     fromDate,
                     toDate,
                     project,
-                    Monday: hours[0],      // Monday hours directly
-                    Tuesday: hours[1],     // Tuesday hours directly
-                    Wednesday: hours[2],   // Wednesday hours directly
-                    Thursday: hours[3],    // Thursday hours directly
-                    Friday: hours[4],      // Friday hours directly
-                    Saturday: hours[5],    // Saturday hours directly
-                    Sunday: hours[6],
+                    Monday: parseFloat(row.cells[2].textContent) || 0,
+                    Tuesday: parseFloat(row.cells[3].textContent) || 0,
+                    Wednesday: parseFloat(row.cells[4].textContent) || 0,
+                    Thursday: parseFloat(row.cells[5].textContent) || 0,
+                    Friday: parseFloat(row.cells[6].textContent) || 0,
+                    Saturday: parseFloat(row.cells[7].textContent) || 0,
+                    Sunday: parseFloat(row.cells[8].textContent) || 0,
                     totalHours
                 });
+
+                isAnyRowValid = true;  // Mark that at least one valid row is found
             }
         });
 
-        // Send the data to the server
+        if (!isAnyRowValid) {
+            console.log("No valid rows found. Please fill in at least one row.");
+            alert('Please fill in at least one complete row with dates, project, and hours.');
+            return;  // Stop submission if no valid rows
+        }
+
+        console.log("Form is valid, submitting data:", data);
+
+        // Proceed with submission if at least one valid row is found
         fetch('/Timesheet/SaveTimesheet', {
             method: 'POST',
             headers: {
@@ -289,10 +317,18 @@
         }).then(response => response.json())
             .then(result => {
                 console.log('Success:', result);
+                alert('Timesheet submitted successfully!');
+                resetTable();
+                resetDateFields();
             }).catch(error => {
                 console.error('Error:', error);
             });
     }
+
+
+
+
+
 
     // Function to reset the table
     function resetTable() {
