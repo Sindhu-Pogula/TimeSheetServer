@@ -20,7 +20,9 @@ namespace TimeSheet.Models
 
         [Required]
         [DataType(DataType.Password)]
-        [StringLength(100, MinimumLength = 6)]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 16 characters long.")]
+        [RegularExpression(@"^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,16}$",
+        ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character, with no spaces.")]
         public required string Password { get; set; }
 
         [DataType(DataType.Password)]
