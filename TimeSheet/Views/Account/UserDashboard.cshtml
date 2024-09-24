@@ -190,8 +190,21 @@
         <button type="button" class="reset" onclick="resetTable()">Reset</button>
     </div>
 </div>
+<style>
+.action-buttons {
+    margin-top: 20px;
+}
 
+.button-container {
+    display: inline-block;
+    margin-right: 10px;
+}
 
+.btn-warning {
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+</style>
 
 <script>
     // Function to update the total hours for a row
@@ -227,18 +240,6 @@
         }
     }
 
-
-    // Attach input event to each editable cell
-    // document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
-    //     cell.addEventListener('input', function () {
-    //         // Check if the input contains non-numeric characters except decimal point
-    //         if (/[^0-9.]/.test(this.textContent)) {
-    //             alert("Please enter only numbers.");
-    //             this.textContent = this.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
-    //         }
-    //         updateTotalHours(this.parentElement);
-    //     });
-    // });
     document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
         cell.addEventListener('input', function () {
             if (/[^0-9.]/.test(this.textContent)) {
@@ -272,12 +273,12 @@
             const isRowEmpty = !fromDate && !toDate && !project && totalHours === 0;
             const isRowValid = fromDate && toDate && project && totalHours > 0;
 
-            if (!isRowEmpty && !isRowValid) {
-                // If the row is not empty but not valid, show an alert for that row
-                console.log(`Row ${index + 1} is invalid. Please fill all required details.`);
-                alert(`Please fill all required details in row ${index + 1}. Ensure dates, project, and hours are correctly filled.`);
-                return;  // Stop the submission on the first invalid row
-            }
+            // if (!isRowEmpty && !isRowValid) {
+            //     // If the row is not empty but not valid, show an alert for that row
+            //     console.log(`Row ${index + 1} is invalid. Please fill all required details.`);
+            //     alert(`Please fill all required details in row ${index + 1}. Ensure dates, project, and hours are correctly filled.`);
+            //     return;  // Stop the submission on the first invalid row
+            // }
 
             if (isRowValid) {
                 // If the row is valid, push the data to the array
@@ -324,7 +325,6 @@
                 console.error('Error:', error);
             });
     }
-
 
 
 

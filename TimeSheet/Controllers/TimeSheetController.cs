@@ -27,7 +27,7 @@ namespace TimeSheet.Controllers
                 Console.WriteLine($"Saving entry: {entry.Project}, {entry.Monday}, {entry.Tuesday}, {entry.Wednesday}, {entry.Thursday}, {entry.Friday}, {entry.Saturday}, {entry.Sunday}");
                 // Assuming 'Date' and 'Project' together form a unique identifier for a Timesheet entry
                 var existingEntry = await _context.Timesheets
-                                                  .FirstOrDefaultAsync(e => e.FromDate == entry.FromDate && e.ToDate ==entry.ToDate&& e.Project == entry.Project);
+                                                  .FirstOrDefaultAsync(e => e.FromDate == entry.FromDate && e.ToDate == entry.ToDate && e.Project == entry.Project);
                 if (existingEntry != null)
                 {
                     // Update existing entry
@@ -91,6 +91,56 @@ namespace TimeSheet.Controllers
         //    var filteredTimesheets = await timesheets.ToListAsync();
         //    return View(filteredTimesheets);
         //}
+
+        // GET: Timesheet/Edit/{id}
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var timesheet = await _context.Timesheets.FindAsync(id);
+            if (timesheet == null)
+            {
+                return NotFound();
+            }
+            return View(timesheet); // Pass the timesheet to the Edit view
+        }
+
+        // POST: Timesheet/Edit/{id}
+        [HttpPost]
+        public async Task<IActionResult> Edit(Timesheet model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Fetch the existing timesheet entry by its ID
+                var existingTimesheet = await _context.Timesheets.FindAsync(model.Id);
+
+                if (existingTimesheet != null)
+                {
+                    // Update the existing timesheet fields
+                    existingTimesheet.FromDate = model.FromDate;
+                    existingTimesheet.ToDate = model.ToDate;
+                    existingTimesheet.Project = model.Project;
+                    existingTimesheet.Monday = model.Monday;
+                    existingTimesheet.Tuesday = model.Tuesday;
+                    existingTimesheet.Wednesday = model.Wednesday;
+                    existingTimesheet.Thursday = model.Thursday;
+                    existingTimesheet.Friday = model.Friday;
+                    existingTimesheet.Saturday = model.Saturday;
+                    existingTimesheet.Sunday = model.Sunday;
+                    existingTimesheet.TotalHours = model.TotalHours;
+
+                    // Save the updated timesheet entry to the database
+                    _context.Update(existingTimesheet);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Redirect to the Timesheet History page after saving
+                return RedirectToAction("History");
+            }
+
+            // Return the view with model errors if validation fails
+            return View(model);
+        }
+
         public async Task<IActionResult> History(string searchQuery)
         {
             var timesheetHistory = await _context.Timesheets
@@ -105,6 +155,21 @@ namespace TimeSheet.Controllers
             return View(timesheetHistory);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var timesheet = await _context.Timesheets.FindAsync(id);
+            if (timesheet == null)
+            {
+                return NotFound();
+            }
+
+            _context.Timesheets.Remove(timesheet);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Deleted successfully!";
+            return RedirectToAction("History");
+        }
 
         public async Task<IActionResult> DownloadTimesheet()
         {
