@@ -1,4 +1,4 @@
-﻿@model TimeSheet.Models.Timesheet
+﻿@* @model TimeSheet.Models.Timesheet
 
 <h2>Edit Timesheet</h2>
 
@@ -73,38 +73,21 @@
 
         // Show a confirmation message before submission
         const confirmed = confirm("Are you sure you want to save the changes?");
-        
+
         if (!confirmed) {
             // Prevent form submission if not confirmed
             event.preventDefault();
             return false;
         }
 
-        // Optionally, if the form passes all validations, you can submit the form manually
-        // and then redirect to the History page
-        // If you're using an AJAX call, you could handle the redirection after a successful request.
-        
-        // Assuming the form submission is successful, redirect to the History page
-        window.location.href = "/Timesheet/History";  // This is where you want to redirect
+        // Calculate total hours
+        const totalHours = document.getElementById('TotalHours').value;
+
+        // Redirect to the History page with total hours as a query parameter
+        window.location.href = `/Timesheet/History?totalHours=${encodeURIComponent(totalHours)}`;
     }
 
-    function updateTotalHours() {
-        let total = 0;
-
-        // Calculate total hours from the input fields
-        const dayFields = document.querySelectorAll('.day-hours');
-        dayFields.forEach(function (input) {
-            let value = parseFloat(input.value) || 0;
-            total += value;
-        });
-
-        // Update the TotalHours field with the calculated total
-        document.getElementById('TotalHours').value = total.toFixed(2);
-    }
-</script>
-
-<script>
-    // Function to update the TotalHours field
+        // Function to update the TotalHours field
     function updateTotalHours() {
         let total = 0;
 
@@ -127,5 +110,8 @@
     });
 
     // Trigger initial calculation on page load in case there are pre-filled values
+
     document.addEventListener('DOMContentLoaded', updateTotalHours);
+
 </script>
+ *@

@@ -204,6 +204,8 @@
     background-color: #f0ad4e;
     border-color: #eea236;
 }
+
+    
 </style>
 
 <script>
@@ -215,6 +217,10 @@
         row.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
             let content = cell.textContent.trim();
             let [hours, minutes] = content.split('.').map(Number); // Split hours and minutes
+
+            if (!content) { // Skip empty cells
+                return;
+            }
 
             if (isNaN(hours) || hours < 0 || hours > 24) {
                 alert("Please enter a valid number between 0 and 24 for hours.");
@@ -233,11 +239,16 @@
             // Convert hours and minutes into a decimal representation for total calculation
             const decimalHours = hours + (minutes ? (minutes / 60) : 0);
             total += decimalHours;
+           // cell.textContent = decimalHours.toFixed(2);
+
         });
 
         if (isValid) {
             row.querySelector('.total-hours').textContent = total.toFixed(2);
+        } else {
+            row.querySelector('.total-hours').textContent = ''; // Clear total if invalid
         }
+
     }
 
     document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
@@ -249,7 +260,17 @@
             updateTotalHours(this.parentElement);
         });
     });
+   // Example function to format and insert data dynamically
+    function populateTable(values) {
+        const row = document.getElementById('data-row');
+        row.innerHTML = ''; // Clear existing data
 
+        values.forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value.toFixed(2); // Format value to two decimal places
+            row.appendChild(cell);
+        });
+    }
 
     function submitTimesheet() {
         const rows = document.querySelectorAll('tbody tr');
@@ -325,10 +346,6 @@
                 console.error('Error:', error);
             });
     }
-
-
-
-
 
     // Function to reset the table
     function resetTable() {

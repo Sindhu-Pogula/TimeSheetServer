@@ -54,18 +54,18 @@ namespace TimeSheet.Controllers
             return Json(new { success = true });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> DeleteTimesheet(int id)
-        {
-            var entry = await _context.Timesheets.FindAsync(id);
-            if (entry != null)
-            {
-                _context.Timesheets.Remove(entry);
-                await _context.SaveChangesAsync();
-            }
-            return Json(new { success = true });
-        }
-        //public async Task<IActionResult> History(string searchQuery)
+        //[HttpPost]
+        //public async Task<IActionResult> DeleteTimesheet(int id)
+        //{
+        //    var entry = await _context.Timesheets.FindAsync(id);
+        //    if (entry != null)
+        //    {
+        //        _context.Timesheets.Remove(entry);
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    return Json(new { success = true });
+        //}
+        ////public async Task<IActionResult> History(string searchQuery)
         //{
         //    var timesheets = _context.Timesheets.AsQueryable();
 
