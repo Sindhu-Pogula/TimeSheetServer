@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNet.Identity.Owin;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,13 @@ public class AccountController : Controller
     {
         return View();
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        //await SignInManager.SignOutAsync();  // Ensure the user is logged out
+        return RedirectToAction("Login", "Account");  // Redirect to the Index action of HomeController
+    }
 
     // POST: Account/Signup
     [HttpPost]
@@ -38,8 +47,8 @@ public class AccountController : Controller
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-           /// / Set a flag in session to indicate successful registration
-        HttpContext.Session.SetString("RegistrationSuccess", "true");
+            /// / Set a flag in session to indicate successful registration
+            HttpContext.Session.SetString("RegistrationSuccess", "true");
 
             // Redirect to the Login page after successful signup
             return RedirectToAction("Login");

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
 
 namespace TimeSheet.Controllers
 {
@@ -14,6 +15,16 @@ namespace TimeSheet.Controllers
         public TimesheetController(ApplicationDbContext context)
         {
             _context = context;
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            // Sign out the user
+            await HttpContext.SignOutAsync();
+
+            // Redirect to the home page or login page after logout
+            return RedirectToAction("", "");
         }
 
         [HttpPost]
