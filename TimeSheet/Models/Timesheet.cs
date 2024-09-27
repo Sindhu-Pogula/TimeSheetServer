@@ -16,7 +16,7 @@ namespace TimeSheet.Models
         
         [Required]
         [StringLength(100)]
-        public string Project { get; set; }
+        public required string Project { get; set; }
 
         [Range(0, 24)]
         public decimal Monday { get; set; }
