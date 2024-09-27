@@ -1,315 +1,401 @@
 ﻿@model TimeSheet.Models.User
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-            position: relative; /* Ensure positioning context for the logout button */
-        }
+<div class="logout-container">
+    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+        <button type="submit" style="background: none; border: none; cursor: pointer; color: #4CAF50;">
+            <i class="fa fa-power-off" aria-hidden="true"></i> Logout
+        </button>
+    </form>
+</div>
+<h2>Welcome, @Model.Username</h2>
+<p>This is your dashboard, <b>@Model.Username</b>. You are logged in!</p>
 
-        .logout-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 20px;
+    }
 
-            .logout-container button {
-                background-color: transparent;
-                border: none;
-                cursor: pointer;
-                color: #4CAF50;
-                font-size: 16px;
-                padding: 10px;
-            }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: left;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
 
-                .logout-container button:hover {
-                    color: #d9534f; /* Change color on hover */
-                }
+    thead tr {
+        background-color: #4CAF50;
+        color: white;
+        text-align: left;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 16px;
-            text-align: left;
-            background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
 
-        thead tr {
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+
+    td[contenteditable="true"] {
+        background-color: #e9f5e9;
+        outline: none;
+    }
+
+    .control-label {
+        font-weight: bold;
+    }
+
+    .button-container {
+        text-align: right;
+        margin-top: 20px;
+    }
+
+        .button-container button {
             background-color: #4CAF50;
             color: white;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: none;
+            padding: 10px 20px;
             text-align: center;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tbody tr:hover {
-            background-color: #f1f1f1;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
             cursor: pointer;
+            border-radius: 5px;
         }
 
-        td[contenteditable="true"] {
-            background-color: #e9f5e9;
-            outline: none;
-        }
-
-        .control-label {
-            font-weight: bold;
-        }
-
-        .button-container {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-            .button-container button {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin: 4px 2px;
-                cursor: pointer;
-                border-radius: 5px;
+            .button-container button.reset {
+                background-color: #f44336; /* Red */
             }
 
-                .button-container button.reset {
-                    background-color: #f44336; /* Red */
-                }
+    .date-container {
+        display: grid;
+    }
 
-        .date-container {
-            display: grid;
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .history-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .logout-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+        .logout-container button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: #4CAF50;
+            font-size: 16px;
+            padding: 10px;
         }
 
-        .action-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
+            .logout-container button:hover {
+                color: #d9534f; /* Change color on hover */
+            }
+</style>
 
-        .history-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-warning {
-            background-color: #f0ad4e;
-            border-color: #eea236;
-        }
-    </style>
-</head>
-<body>
-    <div class="logout-container">
-        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
-            <button type="submit" style="background: none; border: none; cursor: pointer; color: #4CAF50;">
-                <i class="fa fa-power-off" aria-hidden="true"></i> Logout
-            </button>
-        </form>
+<form asp-action="Signup" method="post">
+    <div class="form-group">
+        <label asp-for="Username" class="control-label">Username:</label>
+        <span class="form-control-plaintext">@Model.Username</span>
+        <input type="hidden" asp-for="Username" />
     </div>
 
-    <h2>Welcome, @Model.Username</h2>
-    <p>This is your dashboard, <b>@Model.Username</b>. You are logged in!</p>
+    <div class="form-group">
+        <label asp-for="Email" class="control-label">Email:</label>
+        <span class="form-control-plaintext">@Model.Email</span>
+        <input type="hidden" asp-for="Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
 
-    <table>
-        <thead>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Projects</th>
+            <!-- Dynamic Columns -->
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+            <!-- /Dynamic Columns -->
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < 7; i++)
+        {
             <tr>
-                <th>Date</th>
-                <th>Projects</th>
-                <!-- Dynamic Columns -->
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-                <th>Sunday</th>
-                <!-- /Dynamic Columns -->
-                <th>Total Hours</th>
+                <td>
+                    <div class="date-container">
+                        <label><b>From:</b></label>
+                        <input type="date" name="fromDate" class="from-date" autocomplete="off" />
+                        <br />
+                        <label><b>To:</b></label>
+                        <input type="date" name="toDate" class="to-date" autocomplete="off" />
+                    </div>
+                </td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td class="total-hours"></td>
             </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < 7; i++)
-            {
-                <tr>
-                    <td>
-                        <div class="date-container">
-                            <label><b>From:</b></label>
-                            <input type="date" name="fromDate" class="from-date" autocomplete="off" />
-                            <br />
-                            <label><b>To:</b></label>
-                            <input type="date" name="toDate" class="to-date" autocomplete="off" />
-                        </div>
-                    </td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td contenteditable="true"></td>
-                    <td class="total-hours"></td>
-                </tr>
-            }
-        </tbody>
-    </table>
 
-    <div class="action-buttons">
-        <div class="button-container">
-            <a href="/Timesheet/History" class="btn btn-primary history-icon">
-                <i class="fa fa-history"></i> View Timesheet History
-            </a>
-        </div>
-        <div class="button-container">
-            <button type="button" onclick="submitTimesheet()">Submit</button>
-            <button type="button" class="reset" onclick="resetTable()">Reset</button>
-        </div>
+        }
+    </tbody>
+</table>
+@* <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
+    <button type="submit">Logout</button>
+</form> *@
+
+
+
+<div class="action-buttons">
+    <div class="button-container">
+        <a href="/Timesheet/History" class="btn btn-primary history-icon">
+            <i class="fa fa-history"></i>View Timesheet History
+        </a>
     </div>
+    <div class="button-container">
+        <button type="button" onclick="submitTimesheet()">Submit</button>
+        <button type="button" class="reset" onclick="resetTable()">Reset</button>
+    </div>
+</div>
+<style>
+    .action-buttons {
+        margin-top: 20px;
+    }
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            function updateToDate(fromDateInput) {
-                const fromDate = new Date(fromDateInput.value);
-                if (!isNaN(fromDate.getTime())) {
-                    const toDate = new Date(fromDate);
-                    toDate.setDate(fromDate.getDate() + 6);
+    .button-container {
+        display: inline-block;
+        margin-right: 10px;
+    }
 
-                    const formatDate = (date) => date.toISOString().split('T')[0];
-                    const toDateInput = fromDateInput.closest('td').querySelector('.to-date');
+    .btn-warning {
+        background-color: #f0ad4e;
+        border-color: #eea236;
+    }
 
-                    if (toDateInput) {
-                        toDateInput.value = formatDate(toDate);
-                    }
-                }
+</style>
+
+<script>
+    // Function to update the total hours for a row
+    function updateTotalHours(row) {
+        let total = 0;
+        let isValid = true;
+
+        row.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
+            let content = cell.textContent.trim();
+            let [hours, minutes] = content.split('.').map(Number); // Split hours and minutes
+
+            if (!content) { // Skip empty cells
+                return;
             }
 
-            document.querySelectorAll('.from-date').forEach(input => {
-                input.addEventListener('input', function () {
-                    updateToDate(this);
-                });
-            });
+            if (isNaN(hours) || hours < 0 || hours > 24) {
+                alert("Please enter a valid number between 0 and 24 for hours.");
+                cell.textContent = ''; // Clear invalid entry
+                isValid = false;
+                return;
+            }
+
+            if (minutes && (minutes < 0 || minutes >= 60)) {
+                alert("Minutes should be between 0 and 59.");
+                cell.textContent = ''; // Clear invalid minutes
+                isValid = false;
+                return;
+            }
+
+            // Convert hours and minutes into a decimal representation for total calculation
+            const decimalHours = hours + (minutes ? (minutes / 60) : 0);
+            total += decimalHours;
+            // cell.textContent = decimalHours.toFixed(2);
+
         });
 
-        function updateTotalHours(row) {
-            let total = 0;
-            let isValid = true;
-
-            row.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
-                let content = cell.textContent.trim();
-                let [hours, minutes] = content.split('.').map(Number);
-
-                if (!content) {
-                    return;
-                }
-
-                if (isNaN(hours) || hours < 0 || hours > 24) {
-                    alert("Please enter a valid number between 0 and 24 for hours.");
-                    cell.textContent = '';
-                    isValid = false;
-                    return;
-                }
-
-                if (minutes && (minutes < 0 || minutes >= 60)) {
-                    alert("Minutes should be between 0 and 59.");
-                    cell.textContent = '';
-                    isValid = false;
-                    return;
-                }
-
-                const decimalHours = hours + (minutes ? (minutes / 60) : 0);
-                total += decimalHours;
-            });
-
-            if (isValid) {
-                row.querySelector('.total-hours').textContent = total.toFixed(2);
-            } else {
-                row.querySelector('.total-hours').textContent = '';
-            }
+        if (isValid) {
+            row.querySelector('.total-hours').textContent = total.toFixed(2);
+        } else {
+            row.querySelector('.total-hours').textContent = ''; // Clear total if invalid
         }
 
-        document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
-            cell.addEventListener('input', function () {
-                if (/[^0-9.]/.test(this.textContent)) {
-                    alert("Please enter only numbers.");
-                    this.textContent = this.textContent.replace(/[^0-9.]/g, '');
-                }
-                updateTotalHours(this.parentElement);
-            });
+    }
+
+    document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
+        cell.addEventListener('input', function () {
+            if (/[^0-9.]/.test(this.textContent)) {
+                alert("Please enter only numbers.");
+                this.textContent = this.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+            }
+            updateTotalHours(this.parentElement);
+        });
+    });
+    // Example function to format and insert data dynamically
+    function populateTable(values) {
+        const row = document.getElementById('data-row');
+        row.innerHTML = ''; // Clear existing data
+
+        values.forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value.toFixed(2); // Format value to two decimal places
+            row.appendChild(cell);
+        });
+    }
+
+    function submitTimesheet() {
+        const rows = document.querySelectorAll('tbody tr');
+        const data = [];
+        let isAnyRowValid = false;  // Track if at least one valid row exists
+
+        rows.forEach((row, index) => {
+            const fromDate = row.querySelector('input[name="fromDate"]').value;
+            const toDate = row.querySelector('input[name="toDate"]').value;
+            const project = row.cells[1].textContent.trim();
+            const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
+
+            // Logging to inspect values
+            console.log(`Row ${index + 1}:`);
+            console.log("From Date: ", fromDate);
+            console.log("To Date: ", toDate);
+            console.log("Project: ", project);
+            console.log("Total Hours: ", totalHours);
+
+            // Check if the row has partial or full data
+            const isRowEmpty = !fromDate && !toDate && !project && totalHours === 0;
+            const isRowValid = fromDate && toDate && project && totalHours > 0;
+
+            // if (!isRowEmpty && !isRowValid) {
+            //     // If the row is not empty but not valid, show an alert for that row
+            //     console.log(`Row ${index + 1} is invalid. Please fill all required details.`);
+            //     alert(`Please fill all required details in row ${index + 1}. Ensure dates, project, and hours are correctly filled.`);
+            //     return;  // Stop the submission on the first invalid row
+            // }
+
+            if (isRowValid) {
+                // If the row is valid, push the data to the array
+                data.push({
+                    fromDate,
+                    toDate,
+                    project,
+                    Monday: parseFloat(row.cells[2].textContent) || 0,
+                    Tuesday: parseFloat(row.cells[3].textContent) || 0,
+                    Wednesday: parseFloat(row.cells[4].textContent) || 0,
+                    Thursday: parseFloat(row.cells[5].textContent) || 0,
+                    Friday: parseFloat(row.cells[6].textContent) || 0,
+                    Saturday: parseFloat(row.cells[7].textContent) || 0,
+                    Sunday: parseFloat(row.cells[8].textContent) || 0,
+                    totalHours
+                });
+
+                isAnyRowValid = true;  // Mark that at least one valid row is found
+            }
         });
 
-        function submitTimesheet() {
-            const rows = document.querySelectorAll('tbody tr');
-            const data = [];
-            let isAnyRowValid = false;
+        if (!isAnyRowValid) {
+            console.log("No valid rows found. Please fill in at least one row.");
+            alert('Please fill in at least one complete row with dates, project, and hours.');
+            return;  // Stop submission if no valid rows
+        }
 
-            rows.forEach((row, index) => {
-                const fromDate = row.querySelector('input[name="fromDate"]').value;
-                const toDate = row.querySelector('input[name="toDate"]').value;
-                const project = row.cells[1].textContent.trim();
-                const totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
+        console.log("Form is valid, submitting data:", data);
 
-                console.log(`Row ${index + 1}:`);
-                console.log("From Date: ", fromDate);
-                console.log("To Date: ", toDate);
-                console.log("Project: ", project);
-                console.log("Total Hours: ", totalHours);
-
-                const isRowEmpty = !fromDate && !toDate && !project && totalHours === 0;
-                const isRowValid = fromDate && toDate && project && totalHours > 0;
-
-                if (isRowValid) {
-                    isAnyRowValid = true;
-                }
-
-                if (!isRowEmpty) {
-                    data.push({ fromDate, toDate, project, totalHours });
-                }
+        // Proceed with submission if at least one valid row is found
+        fetch('/Timesheet/SaveTimesheet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(result => {
+                console.log('Success:', result);
+                alert('Timesheet submitted successfully!');
+                resetTable();
+                resetDateFields();
+            }).catch(error => {
+                console.error('Error:', error);
             });
+    }
 
-            if (isAnyRowValid) {
-                alert("Timesheet submitted successfully!");
-                // Handle submission logic here (e.g., AJAX request or form submission)
-            } else {
-                alert("Please ensure all rows are filled out correctly.");
+    // Function to reset the table
+    function resetTable() {
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            row.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = '');
+            row.querySelectorAll('input[type="date"]').forEach(input => input.value = ''); // Reset both "From Date" and "To Date"
+            row.querySelector('.total-hours').textContent = ''; // Reset total hours
+        });
+    }
+    function resetDateFields() {
+        // Select all 'From Date' and 'To Date' inputs and reset their values
+        document.querySelectorAll('.from-date, .to-date').forEach(input => {
+            input.value = ''; // Clear the value
+        });
+    }
+
+    // Call the resetDateFields function when the page loads
+    window.onload = function () {
+        resetTable();
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function to set 'To Date' based on 'From Date'
+        function updateToDate(fromDateInput) {
+            const fromDate = new Date(fromDateInput.value);
+            if (!isNaN(fromDate.getTime())) {
+                const toDate = new Date(fromDate);
+                toDate.setDate(fromDate.getDate() + 6); // Set 'To Date' to a week later
+
+                // Format date to YYYY-MM-DD
+                const formatDate = (date) => date.toISOString().split('T')[0];
+                const toDateInput = fromDateInput.closest('td').querySelector('.to-date');
+
+                if (toDateInput) {
+                    toDateInput.value = formatDate(toDate);
+                }
             }
         }
 
-        function resetTable() {
-            document.querySelectorAll('tbody tr').forEach(row => {
-                row.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
-                    cell.textContent = '';
-                });
-
-                row.querySelectorAll('input').forEach(input => {
-                    input.value = '';
-                });
-
-                row.querySelector('.total-hours').textContent = '';
+        // Attach event listener to 'From Date' inputs
+        document.querySelectorAll('.from-date').forEach(input => {
+            input.addEventListener('input', function () {
+                updateToDate(this);
             });
-        }
-    </script>
-</body>
-</html>
+        });
+    });
+</script>
+
+    
+
