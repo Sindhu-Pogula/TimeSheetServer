@@ -242,7 +242,6 @@
             // Convert hours and minutes into a decimal representation for total calculation
             const decimalHours = hours + (minutes ? (minutes / 60) : 0);
             total += decimalHours;
-            // cell.textContent = decimalHours.toFixed(2);
 
         });
 
@@ -251,9 +250,9 @@
         } else {
             row.querySelector('.total-hours').textContent = ''; // Clear total if invalid
         }
-
     }
 
+    // Attach event listener to all editable cells (except column 2)
     document.querySelectorAll('td[contenteditable="true"]:not(:nth-child(2))').forEach(cell => {
         cell.addEventListener('input', function () {
             if (/[^0-9.]/.test(this.textContent)) {
@@ -263,6 +262,7 @@
             updateTotalHours(this.parentElement);
         });
     });
+
     // Example function to format and insert data dynamically
     function populateTable(values) {
         const row = document.getElementById('data-row');
@@ -275,15 +275,16 @@
         });
     }
 
+    // Function to handle timesheet submission
     function submitTimesheet() {
         const rows = document.querySelectorAll('tbody tr');
         const data = [];
-        let isAnyRowValid = false;  // Track if at least one valid row exists
+        let isAllRowsValid = true; // Track if all rows are valid
 
-    rows.forEach((row, index) => {
-        const fromDate = row.querySelector('input[name="fromDate"]').value;
-        const toDate = row.querySelector('input[name="toDate"]').value;
-        const project = row.cells[1].textContent.trim();
+        rows.forEach((row, index) => {
+            const fromDate = row.querySelector('input[name="fromDate"]').value;
+            const toDate = row.querySelector('input[name="toDate"]').value;
+            const project = row.cells[1].textContent.trim();
             const hoursFilled = [
                 parseFloat(row.cells[2].textContent) || 0,
                 parseFloat(row.cells[3].textContent) || 0,
@@ -293,77 +294,74 @@
                 parseFloat(row.cells[7].textContent) || 0,
                 parseFloat(row.cells[8].textContent) || 0
             ];
-        let totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
+            let totalHours = parseFloat(row.querySelector('.total-hours').textContent) || 0;
 
-        // Check if date is filled but project or hours are missing
-        const isDateFilled = fromDate && toDate;
-        const isProjectFilled = project !== '';
-        const areHoursFilled = totalHours > 0;
-         const isAtLeastOneDayFilled = hoursFilled.some(hour => hour > 0);
+            // Check if date is filled but project or hours are missing
+            const isDateFilled = fromDate && toDate;
+            const isProjectFilled = project !== '';
+            const isAtLeastOneDayFilled = hoursFilled.some(hour => hour > 0);
 
             // Validation: If project or hours are filled but dates are missing
             if ((!isDateFilled && (isProjectFilled || isAtLeastOneDayFilled))) {
                 alert('Please fill in the From Date and To Date before entering project or hours.');
-                return false;  // Stop the submission
+                isAllRowsValid = false;
+                return; // Stop the current iteration, but continue checking other rows
             }
 
             // Updated validation: If dates are filled, check if either project or hours are filled
             if (isDateFilled && (!isProjectFilled && !isAtLeastOneDayFilled)) {
                 alert(`Please fill in the project name or at least one day's hours for the row with dates: ${fromDate} to ${toDate}`);
-                return false;  // Stop submission and show alert
+                isAllRowsValid = false;
+                return;
             }
 
-        // If a project is filled, process the row
+            // If dates, project, or hours are valid, collect row data
             if (isDateFilled && (isProjectFilled || isAtLeastOneDayFilled)) {
-            const rowData = {
-                fromDate,
-                toDate,
-                project,
-                Monday: parseFloat(row.cells[2].textContent) || 0,  // Set to 0 if empty
-                Tuesday: parseFloat(row.cells[3].textContent) || 0,
-                Wednesday: parseFloat(row.cells[4].textContent) || 0,
-                Thursday: parseFloat(row.cells[5].textContent) || 0,
-                Friday: parseFloat(row.cells[6].textContent) || 0,
-                Saturday: parseFloat(row.cells[7].textContent) || 0,
-                Sunday: parseFloat(row.cells[8].textContent) || 0,
-                totalHours
-            };
+                const rowData = {
+                    fromDate,
+                    toDate,
+                    project,
+                    Monday: hoursFilled[0],
+                    Tuesday: hoursFilled[1],
+                    Wednesday: hoursFilled[2],
+                    Thursday: hoursFilled[3],
+                    Friday: hoursFilled[4],
+                    Saturday: hoursFilled[5],
+                    Sunday: hoursFilled[6],
+                    totalHours
+                };
 
-            // Calculate total hours again to ensure it reflects the correct sum
-            totalHours = rowData.Monday + rowData.Tuesday + rowData.Wednesday +
-                         rowData.Thursday + rowData.Friday + rowData.Saturday + rowData.Sunday;
+                // Recalculate total hours and update in the row
+                totalHours = hoursFilled.reduce((acc, hour) => acc + hour, 0);
+                row.querySelector('.total-hours').textContent = totalHours.toFixed(2);
 
-            // Update the total hours in the row
-            row.querySelector('.total-hours').textContent = totalHours.toFixed(2);
-
-            // Add row data to the data array
-            data.push(rowData);
-            isAnyRowValid = true;  // Mark that at least one valid row is found
-        }
-    });
+                // Add the valid row data to the array
+                data.push(rowData);
+            }
+        });
 
         // If any row is invalid, stop the submission
         if (!isAllRowsValid) {
-            alert('Please fix the invalid rows before submitting the timesheet.');
-            return false;  // Stop submission
+          //  alert('Please fix the invalid rows before submitting the timesheet.');
+            return false; // Stop submission
         }
 
+        // Proceed with submission if all rows are valid
+        fetch('/Timesheet/SaveTimesheet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(result => {
+                alert('Timesheet submitted successfully!');
+                resetTable();
+                resetDateFields();
+            }).catch(error => {
+                console.error('Error:', error);
+            });
 
-    // Proceed with submission
-    fetch('/Timesheet/SaveTimesheet', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    }).then(response => response.json())
-        .then(result => {
-            alert('Timesheet submitted successfully!');
-            resetTable();
-            resetDateFields();
-        }).catch(error => {
-            console.error('Error:', error);
-        });
         return true;
     }
 
@@ -376,6 +374,7 @@
             row.querySelector('.total-hours').textContent = ''; // Reset total hours
         });
     }
+
     function resetDateFields() {
         // Select all 'From Date' and 'To Date' inputs and reset their values
         document.querySelectorAll('.from-date, .to-date').forEach(input => {
@@ -387,6 +386,7 @@
     window.onload = function () {
         resetTable();
     };
+
     document.addEventListener('DOMContentLoaded', function () {
         // Function to set 'To Date' based on 'From Date'
         function updateToDate(fromDateInput) {
@@ -412,6 +412,7 @@
             });
         });
     });
+
 </script>
 
     
