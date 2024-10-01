@@ -16,16 +16,16 @@ namespace TimeSheet.Controllers
         {
             _context = context;
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            // Sign out the user
-            await HttpContext.SignOutAsync();
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Logout()
+        //{
+        //    // Sign out the user
+        //    await HttpContext.SignOutAsync();
 
-            // Redirect to the home page or login page after logout
-            return RedirectToAction("", "");
-        }
+        //    // Redirect to the home page or login page after logout
+        //    return RedirectToAction("", "");
+        //}
 
         [HttpPost]
         public async Task<IActionResult> SaveTimesheet([FromBody] Timesheet[] entries)

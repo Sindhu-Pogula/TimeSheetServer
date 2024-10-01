@@ -23,10 +23,10 @@ public class AccountController : Controller
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout()
+    public Task<IActionResult> Logout()
     {
         //await SignInManager.SignOutAsync();  // Ensure the user is logged out
-        return RedirectToAction("Login", "Account");  // Redirect to the Index action of HomeController
+        return Task.FromResult<IActionResult>(RedirectToAction("Login", "Account"));  // Redirect to the Index action of HomeController
     }
 
     // POST: Account/Signup
