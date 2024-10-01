@@ -342,10 +342,12 @@
         }
     });
 
-    // if (!isAnyRowValid) {
-    //     alert('Please provide valid data for at least one row.');
-    //     return;  // Stop submission if no valid rows
-    // }
+        // If any row is invalid, stop the submission
+        if (!isAllRowsValid) {
+            alert('Please fix the invalid rows before submitting the timesheet.');
+            return false;  // Stop submission
+        }
+
 
     // Proceed with submission
     fetch('/Timesheet/SaveTimesheet', {
@@ -364,9 +366,6 @@
         });
         return true;
     }
-
-
-
 
     // Function to reset the table
     function resetTable() {
