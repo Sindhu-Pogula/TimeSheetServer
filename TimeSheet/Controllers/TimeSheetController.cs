@@ -33,17 +33,31 @@ namespace TimeSheet.Controllers
             if (entries == null || !entries.Any())
                 return BadRequest("No entries provided.");
 
+            // Retrieve the logged-in user's username from the session
+            var username = HttpContext.Session.GetString("Username");
+
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(); // Ensure user is logged in
+
+            // Find the user by the username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+                return Unauthorized();
+
             foreach (var entry in entries)
             {
-                Console.WriteLine($"Saving entry: {entry.Project}, {entry.Monday}, {entry.Tuesday}, {entry.Wednesday}, {entry.Thursday}, {entry.Friday}, {entry.Saturday}, {entry.Sunday}");
-                // Assuming 'Date' and 'Project' together form a unique identifier for a Timesheet entry
+                entry.UserId = user.Id; // Link timesheet to the logged-in user
+
                 var existingEntry = await _context.Timesheets
-                                                  .FirstOrDefaultAsync(e => e.FromDate == entry.FromDate && e.ToDate == entry.ToDate && e.Project == entry.Project);
+                                                  .FirstOrDefaultAsync(e => e.FromDate == entry.FromDate
+                                                                         && e.ToDate == entry.ToDate
+                                                                         && e.Project == entry.Project
+                                                                         && e.UserId == user.Id); // Ensure timesheet is unique to the user
+
                 if (existingEntry != null)
                 {
                     // Update existing entry
-                    //existingEntry.FromDate = entry.FromDate;
-                    //existingEntry.ToDate = entry.ToDate;
                     existingEntry.Monday = entry.Monday;
                     existingEntry.Tuesday = entry.Tuesday;
                     existingEntry.Wednesday = entry.Wednesday;
@@ -64,6 +78,7 @@ namespace TimeSheet.Controllers
             await _context.SaveChangesAsync();
             return Json(new { success = true });
         }
+
 
         //[HttpPost]
         //public async Task<IActionResult> DeleteTimesheet(int id)
@@ -154,17 +169,32 @@ namespace TimeSheet.Controllers
 
         public async Task<IActionResult> History(string searchQuery)
         {
+            // Retrieve the logged-in user's username from session
+            var username = HttpContext.Session.GetString("Username");
+
+            if (string.IsNullOrEmpty(username))
+                return RedirectToAction("Login", "Account");
+
+            // Find the user by the username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            // Fetch only the timesheets belonging to the logged-in user
             var timesheetHistory = await _context.Timesheets
-                .Where(t => string.IsNullOrEmpty(searchQuery) ||
-                            t.FromDate.ToString().Contains(searchQuery) ||
-                            t.ToDate.ToString().Contains(searchQuery) ||
-                            t.Project.Contains(searchQuery))
+                .Where(t => t.UserId == user.Id &&
+                            (string.IsNullOrEmpty(searchQuery) ||
+                             t.FromDate.ToString().Contains(searchQuery) ||
+                             t.ToDate.ToString().Contains(searchQuery) ||
+                             t.Project.Contains(searchQuery)))
                 .ToListAsync();
 
             ViewData["SearchQuery"] = searchQuery;
 
             return View(timesheetHistory);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(int id)

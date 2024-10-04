@@ -12,8 +12,8 @@ using TimeSheet.Models;
 namespace TimeSheet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240925042313_Initial-Creater")]
-    partial class InitialCreater
+    [Migration("20241004052635_initialcreate")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -65,10 +65,15 @@ namespace TimeSheet.Migrations
                     b.Property<decimal>("Tuesday")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Wednesday")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Timesheets");
                 });
@@ -104,6 +109,17 @@ namespace TimeSheet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TimeSheet.Models.Timesheet", b =>
+                {
+                    b.HasOne("TimeSheet.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

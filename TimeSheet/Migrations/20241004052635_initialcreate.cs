@@ -6,34 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TimeSheet.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreater : Migration
+    public partial class initialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Timesheets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FromDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ToDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Project = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Monday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Tuesday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Wednesday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Thursday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Friday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Saturday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Sunday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalHours = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Timesheets", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -49,6 +26,41 @@ namespace TimeSheet.Migrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Timesheets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    FromDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ToDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Project = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Monday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Tuesday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Wednesday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Thursday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Friday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Saturday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Sunday = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalHours = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Timesheets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Timesheets_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Timesheets_UserId",
+                table: "Timesheets",
+                column: "UserId");
         }
 
         /// <inheritdoc />

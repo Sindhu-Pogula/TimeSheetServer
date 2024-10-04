@@ -1,12 +1,19 @@
 ﻿// Models/Timesheet.cs
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TimeSheet.Models
 {
     public class Timesheet
     {
         public int Id { get; set; }
+
+        // Foreign key for the User
+        public int UserId { get; set; }
+
+        [ForeignKey("UserId")]
+        public User? User { get; set; } // Navigation property
 
         [Required]
         public DateTime FromDate { get; set; }
