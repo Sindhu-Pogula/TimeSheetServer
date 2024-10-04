@@ -113,28 +113,6 @@ namespace TimeSheet.Controllers
             TempData["SuccessMessage"] = "Deleted successfully!";
             return RedirectToAction("History");
         }
-
-        //public async Task<IActionResult> DownloadTimesheet()
-        //{
-        //    // Fetch timesheet data
-        //    var timesheets = await _context.Timesheets.ToListAsync();
-
-        //    // Create CSV content
-        //    var csv = new StringBuilder();
-        //    csv.AppendLine("FromDate,ToDate,Project,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TotalHours");
-
-        //    foreach (var entry in timesheets)
-        //    {
-        //        csv.AppendLine($"{entry.FromDate},{entry.ToDate},{entry.Project},{entry.Monday},{entry.Tuesday},{entry.Wednesday},{entry.Thursday},{entry.Friday},{entry.Saturday},{entry.Sunday},{entry.TotalHours}");
-        //    }
-
-        //    // Convert CSV content to byte array
-        //    var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-
-        //    // Return CSV file for download
-        //    return File(bytes, "text/csv", "TimesheetData.csv");
-        //}
-
         public async Task<IActionResult> DownloadTimesheet()
         {
             // Retrieve the logged-in user's username from session
@@ -169,7 +147,6 @@ namespace TimeSheet.Controllers
             // Return CSV file for download
             return File(bytes, "text/csv", "TimesheetData.csv");
         }
-
     }
 }
 

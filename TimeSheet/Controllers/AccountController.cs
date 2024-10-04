@@ -42,7 +42,7 @@ public class AccountController : Controller
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            /// / Set a flag in session to indicate successful registration
+            // Set a flag in session to indicate successful registration
             HttpContext.Session.SetString("RegistrationSuccess", "true");
 
             // Redirect to the Login page after successful signup

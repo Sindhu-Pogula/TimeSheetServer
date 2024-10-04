@@ -126,13 +126,6 @@
     }
 </style>
 
-
-<!-- Display validation summary for error messages -->
-@* This will display any error message set in the controller *@
-@* <div>
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-</div> *@
-
 <form asp-action="Login" method="post">
     <div class="form-group">
         <label asp-for="Username" class="control-label"></label>
