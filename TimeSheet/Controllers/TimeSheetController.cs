@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TimeSheet.Models;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
@@ -16,16 +14,7 @@ namespace TimeSheet.Controllers
         {
             _context = context;
         }
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Logout()
-        //{
-        //    // Sign out the user
-        //    await HttpContext.SignOutAsync();
 
-        //    // Redirect to the home page or login page after logout
-        //    return RedirectToAction("", "");
-        //}
 
         [HttpPost]
         public async Task<IActionResult> SaveTimesheet([FromBody] Timesheet[] entries)
@@ -79,93 +68,6 @@ namespace TimeSheet.Controllers
             return Json(new { success = true });
         }
 
-
-        //[HttpPost]
-        //public async Task<IActionResult> DeleteTimesheet(int id)
-        //{
-        //    var entry = await _context.Timesheets.FindAsync(id);
-        //    if (entry != null)
-        //    {
-        //        _context.Timesheets.Remove(entry);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    return Json(new { success = true });
-        //}
-        ////public async Task<IActionResult> History(string searchQuery)
-        //{
-        //    var timesheets = _context.Timesheets.AsQueryable();
-
-        //    if (!string.IsNullOrEmpty(searchQuery))
-        //    {
-        //        DateTime fromDate;
-        //        DateTime toDate;
-
-        //        if (DateTime.TryParse(searchQuery, out fromDate))
-        //        {
-        //            timesheets = timesheets.Where(t => t.FromDate.Date == fromDate.Date || t.ToDate.Date == fromDate.Date);
-        //        }
-        //        else if (DateTime.TryParse(searchQuery, out toDate))
-        //        {
-        //            timesheets = timesheets.Where(t => t.ToDate.Date == toDate.Date);
-        //        }
-        //        else
-        //        {
-        //            timesheets = timesheets.Where(t => t.Project.Contains(searchQuery));
-        //        }
-        //    }
-
-        //    var filteredTimesheets = await timesheets.ToListAsync();
-        //    return View(filteredTimesheets);
-        //}
-
-        // GET: Timesheet/Edit/{id}
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var timesheet = await _context.Timesheets.FindAsync(id);
-            if (timesheet == null)
-            {
-                return NotFound();
-            }
-            return View(timesheet); // Pass the timesheet to the Edit view
-        }
-
-        // POST: Timesheet/Edit/{id}
-        [HttpPost]
-        public async Task<IActionResult> Edit(Timesheet model)
-        {
-            if (ModelState.IsValid)
-            {
-                // Fetch the existing timesheet entry by its ID
-                var existingTimesheet = await _context.Timesheets.FindAsync(model.Id);
-
-                if (existingTimesheet != null)
-                {
-                    // Update the existing timesheet fields
-                    existingTimesheet.FromDate = model.FromDate;
-                    existingTimesheet.ToDate = model.ToDate;
-                    existingTimesheet.Project = model.Project;
-                    existingTimesheet.Monday = model.Monday;
-                    existingTimesheet.Tuesday = model.Tuesday;
-                    existingTimesheet.Wednesday = model.Wednesday;
-                    existingTimesheet.Thursday = model.Thursday;
-                    existingTimesheet.Friday = model.Friday;
-                    existingTimesheet.Saturday = model.Saturday;
-                    existingTimesheet.Sunday = model.Sunday;
-                    existingTimesheet.TotalHours = model.TotalHours;
-
-                    // Save the updated timesheet entry to the database
-                    _context.Update(existingTimesheet);
-                    await _context.SaveChangesAsync();
-                }
-
-                // Redirect to the Timesheet History page after saving
-                return RedirectToAction("History");
-            }
-
-            // Return the view with model errors if validation fails
-            return View(model);
-        }
 
         public async Task<IActionResult> History(string searchQuery)
         {
@@ -233,6 +135,5 @@ namespace TimeSheet.Controllers
             return File(bytes, "text/csv", "TimesheetData.csv");
         }
     }
-
 }
 

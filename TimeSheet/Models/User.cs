@@ -29,5 +29,4 @@ namespace TimeSheet.Models
         [Compare("Password")]
         public required string ConfirmPassword { get; set; }
     }
-
 }
