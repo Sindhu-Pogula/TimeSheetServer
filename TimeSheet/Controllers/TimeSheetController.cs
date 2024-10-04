@@ -114,10 +114,45 @@ namespace TimeSheet.Controllers
             return RedirectToAction("History");
         }
 
+        //public async Task<IActionResult> DownloadTimesheet()
+        //{
+        //    // Fetch timesheet data
+        //    var timesheets = await _context.Timesheets.ToListAsync();
+
+        //    // Create CSV content
+        //    var csv = new StringBuilder();
+        //    csv.AppendLine("FromDate,ToDate,Project,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,TotalHours");
+
+        //    foreach (var entry in timesheets)
+        //    {
+        //        csv.AppendLine($"{entry.FromDate},{entry.ToDate},{entry.Project},{entry.Monday},{entry.Tuesday},{entry.Wednesday},{entry.Thursday},{entry.Friday},{entry.Saturday},{entry.Sunday},{entry.TotalHours}");
+        //    }
+
+        //    // Convert CSV content to byte array
+        //    var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+
+        //    // Return CSV file for download
+        //    return File(bytes, "text/csv", "TimesheetData.csv");
+        //}
+
         public async Task<IActionResult> DownloadTimesheet()
         {
-            // Fetch timesheet data
-            var timesheets = await _context.Timesheets.ToListAsync();
+            // Retrieve the logged-in user's username from session
+            var username = HttpContext.Session.GetString("Username");
+
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(); // Ensure user is logged in
+
+            // Find the user by the username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+                return Unauthorized();
+
+            // Fetch only the timesheets belonging to the logged-in user
+            var timesheets = await _context.Timesheets
+                .Where(t => t.UserId == user.Id)
+                .ToListAsync();
 
             // Create CSV content
             var csv = new StringBuilder();
@@ -134,6 +169,7 @@ namespace TimeSheet.Controllers
             // Return CSV file for download
             return File(bytes, "text/csv", "TimesheetData.csv");
         }
+
     }
 }
 
