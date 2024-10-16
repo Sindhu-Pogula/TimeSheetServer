@@ -49,14 +49,14 @@
     <tbody id="timesheet-body">
         <tr class="timesheet-row">
             <td contenteditable="true" class="project-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td contenteditable="true" class="hours-input"></td>
-            <td class="total-hours"></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td class="total-hours"></td> <!-- Ensure this class is present -->
         </tr>
     </tbody>
 </table>
@@ -71,7 +71,6 @@
         </a>
     </div>
     <div class="button-container">
-        @* <button id="addRowButton" onclick="addRow()">Add Row</button> *@
         <button type="button" class="reset" onclick="resetTable()">Reset</button>
         <button type="button" onclick="submitTimesheet()">Submit</button>
     </div>
@@ -199,154 +198,184 @@
 </style>
 
 <script>
-    function autoFillToDateAndDays() {
-        const fromDateInput = document.querySelector('.from-date');
-        const toDateInput = document.querySelector('.to-date');
-        const fromDateValue = new Date(fromDateInput.value);
+    // Auto-fill the ToDate field based on FromDate (7 days range)
+function autoFillToDateAndDays() {
+    const fromDateInput = document.querySelector('.from-date');
+    const toDateInput = document.querySelector('.to-date');
+    const fromDateValue = new Date(fromDateInput.value);
 
-        if (!isNaN(fromDateValue.getTime())) {
-            const toDateValue = new Date(fromDateValue);
-            toDateValue.setDate(toDateValue.getDate() + 6); // Set To Date to 6 days later
-            toDateInput.value = toDateValue.toISOString().split('T')[0];
-        }
+    if (!isNaN(fromDateValue.getTime())) {
+        const toDateValue = new Date(fromDateValue);
+        toDateValue.setDate(toDateValue.getDate() + 6); // Set To Date to 6 days later
+        toDateInput.value = toDateValue.toISOString().split('T')[0];
     }
+}
 
-    function updateTotalHours(row) {
-        let total = 0;
+// Function to update total hours for each row
+function updateTotalHours(row) {
+    let totalMinutes = 0;
 
-        row.querySelectorAll('td.hours-input').forEach(cell => {
-            const value = parseFloat(cell.textContent) || 0;
-            total += value;
-        });
+    row.querySelectorAll('input.hours-input').forEach(input => {
+        const timeValue = input.value || "00:00"; // Default to "00:00" if input is empty
+        const [hours, minutes] = timeValue.split(':').map(Number);
+        totalMinutes += (hours * 60) + minutes;
+    });
 
-        row.querySelector('.total-hours').textContent = total.toFixed(2);
-    }
+    const totalHours = (totalMinutes / 60).toFixed(2);
+    row.querySelector('.total-hours').textContent = totalHours; // Display total hours in the row
+}
 
     // Initialize event listeners for existing inputs
     function initInputListeners(row) {
-        row.querySelectorAll('td.hours-input').forEach(cell => {
-            cell.addEventListener('input', function () {
-                if (/[^0-9.]/.test(this.textContent)) {
-                    alert("Please enter only valid numbers.");
-                    this.textContent = this.textContent.replace(/[^0-9.]/g, '');
+        row.querySelectorAll('input.hours-input').forEach(input => {
+            input.addEventListener('input', function () {
+                const timeValue = this.value;
+                if (!/^\d{2}:\d{2}$/.test(timeValue)) {
+                    alert("Please enter a valid time in HH:MM format.");
+                    this.value = "00:00"; // Reset invalid input
                 }
-                updateTotalHours(this.parentElement);
+                updateTotalHours(this.closest('tr')); // Update total hours for the row
             });
         });
+
+        // Ensure the total hours are calculated initially
+        updateTotalHours(row);
     }
 
-    // Function to handle adding a new row
-    function addRow() {
-        const newRow = document.createElement('tr');
-        newRow.classList.add('timesheet-row');
-        newRow.innerHTML = `
-                    <td contenteditable="true" class="project-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td contenteditable="true" class="hours-input"></td>
-                    <td class="total-hours"></td>
-                `;
+    // Call initInputListeners for the first row
+    initInputListeners(document.querySelector('.timesheet-row'));
 
-        // Add the new row to the table
-        document.getElementById('timesheet-body').appendChild(newRow);
+// Function to handle adding a new row
+function addRow() {
+    const newRow = document.createElement('tr');
+    newRow.classList.add('timesheet-row');
+    newRow.innerHTML = `
+        <td contenteditable="true" class="project-input"></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+        <td class="total-hours"></td>
+    `;
 
-        // Initialize input listeners for the new row
-        initInputListeners(newRow);
-    }
+    document.getElementById('timesheet-body').appendChild(newRow);
+    initInputListeners(newRow);
+}
 
-    // Function to handle timesheet submission
     function submitTimesheet() {
         const rows = document.querySelectorAll('.timesheet-table tbody tr');
         const data = [];
-
-        // Get From Date and To Date
         const fromDate = document.querySelector('.from-date').value;
         const toDate = document.querySelector('.to-date').value;
 
         if (!fromDate || !toDate) {
             alert('Please select both From Date and To Date.');
-            return;  // Exit function if dates are missing
+            return;
         }
 
-        let isValid = true; // Flag to track if data is valid
+        let allValid = true;
 
         rows.forEach(row => {
             const project = row.cells[0].textContent.trim();
-
             if (!project) {
                 alert('Project name cannot be empty.');
-                isValid = false;
-                return;  // Exit function for the current row if project is empty
+                allValid = false;
+                return;
             }
 
             const hours = [];
-            for (let i = 1; i <= 7; i++) {
-                const hourValue = parseFloat(row.cells[i].textContent.trim()) || 0;
-                if (isNaN(hourValue) || hourValue < 0) {
-                    alert('Please enter valid hours.');
-                    isValid = false;
-                    return;  // Exit function for invalid hour input
+            let rowValid = true;
+
+            row.querySelectorAll('input.hours-input').forEach(input => {
+                const timeValue = input.value || "00:00";
+                const [hoursPart, minutesPart] = timeValue.split(':').map(Number);
+
+                if (isNaN(hoursPart) || isNaN(minutesPart) || hoursPart < 0 || hoursPart > 24 || minutesPart < 0 || minutesPart >= 60) {
+                    alert('Please enter valid hours and minutes (HH:MM format).');
+                    rowValid = false;
+                    allValid = false;
                 }
-                hours.push(hourValue);
-            }
 
-            const totalHours = parseFloat(row.querySelector('.total-hours').textContent.trim()) || 0;
-
-            data.push({
-                Project: project,
-                FromDate: fromDate,
-                ToDate: toDate,
-                Monday: hours[0],
-                Tuesday: hours[1],
-                Wednesday: hours[2],
-                Thursday: hours[3],
-                Friday: hours[4],
-                Saturday: hours[5],
-                Sunday: hours[6],
-                TotalHours: totalHours
+                hours.push(`${hoursPart}:${minutesPart.toString().padStart(2, '0')}`);
             });
+
+            if (rowValid) {
+                const totalHours = row.querySelector('.total-hours').textContent.trim() || "";
+
+                data.push({
+                    Project: project,
+                    FromDate: fromDate,
+                    ToDate: toDate,
+                    Monday: hours[0],
+                    Tuesday: hours[1],
+                    Wednesday: hours[2],
+                    Thursday: hours[3],
+                    Friday: hours[4],
+                    Saturday: hours[5],
+                    Sunday: hours[6],
+                    TotalHours: totalHours
+                });
+            }
         });
 
-        if (!isValid) {
-            return;  // Exit if any validation failed
+        if (!allValid) {
+            return;
         }
 
-        // Submit data to the server
+        console.log('Data to submit:', data); // Debugging line
+
         fetch('/Timesheet/SaveTimesheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        }).then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw err; }); // Handle 400/500 server errors
-            }
-            return response.json();  // Parse the JSON response
-        }).then(result => {
-            alert('Timesheet submitted successfully!');
-            resetTable();
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('Failed to submit timesheet. Please try again.');
-        });
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    alert('Session expired. Please log in again.');
+                    return;
+                }
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(result => {
+                alert('Timesheet submitted successfully!');
+                resetTable();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit timesheet. Please try again.');
+            });
     }
 
-    function resetTable() {
-        document.querySelectorAll('td[contenteditable="true"]').forEach(cell => cell.textContent = '');
-        document.querySelectorAll('.total-hours').forEach(cell => cell.textContent = '');
-        document.querySelector('.from-date').value = '';
-        document.querySelector('.to-date').value = '';
-        // Optionally, you can clear all rows if you want
-        const rows = document.querySelectorAll('.timesheet-row');
-        rows.forEach((row, index) => {
-            if (index > 0) row.remove(); // Keep only the first row
-        });
- }
-   
-    // Initialize listeners for the initial row
-    initInputListeners(document.querySelector('.timesheet-row'));
+// Function to reset the timesheet table
+function resetTable() {
+    document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+        cell.textContent = '';
+    });
+
+    document.querySelectorAll('input.hours-input').forEach(input => {
+        input.value = '';
+    });
+
+    document.querySelectorAll('.total-hours').forEach(cell => {
+        cell.textContent = '';
+    });
+
+    document.querySelector('.from-date').value = '';
+    document.querySelector('.to-date').value = '';
+
+    const rows = document.querySelectorAll('.timesheet-row');
+    rows.forEach((row, index) => {
+        if (index > 0) row.remove();
+    });
+}
+
+initInputListeners(document.querySelector('.timesheet-row'));
+
 </script>
 
