@@ -36,13 +36,13 @@
     <thead>
         <tr>
             <th>Projects</th>
-            <th>Monday</th>
-            <th>Tuesday</th>
-            <th>Wednesday</th>
-            <th>Thursday</th>
-            <th>Friday</th>
-            <th>Saturday</th>
-            <th>Sunday</th>
+            <th>Monday <br /><span id="monday-date"></span></th>
+            <th>Tuesday <br /><span id="tuesday-date"></span></th>
+            <th>Wednesday <br /><span id="wednesday-date"></span></th>
+            <th>Thursday <br /><span id="thursday-date"></span></th>
+            <th>Friday <br /><span id="friday-date"></span></th>
+            <th>Saturday <br /><span id="saturday-date"></span></th>
+            <th>Sunday <br /><span id="sunday-date"></span></th>
             <th>Total Hours</th>
         </tr>
     </thead>
@@ -198,32 +198,40 @@
 </style>
 
 <script>
-    // Auto-fill the ToDate field based on FromDate (7 days range)
-function autoFillToDateAndDays() {
-    const fromDateInput = document.querySelector('.from-date');
-    const toDateInput = document.querySelector('.to-date');
-    const fromDateValue = new Date(fromDateInput.value);
+    function autoFillToDateAndDays() {
+        const fromDateInput = document.querySelector('.from-date');
+        const toDateInput = document.querySelector('.to-date');
+        const fromDateValue = new Date(fromDateInput.value);
 
-    if (!isNaN(fromDateValue.getTime())) {
-        const toDateValue = new Date(fromDateValue);
-        toDateValue.setDate(toDateValue.getDate() + 6); // Set To Date to 6 days later
-        toDateInput.value = toDateValue.toISOString().split('T')[0];
+        if (!isNaN(fromDateValue.getTime())) {
+            const toDateValue = new Date(fromDateValue);
+            toDateValue.setDate(toDateValue.getDate() + 6); // Set To Date to 6 days later
+            toDateInput.value = toDateValue.toISOString().split('T')[0];
+
+            // Calculate and display dates for each day
+            const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            for (let i = 0; i < 7; i++) {
+                const currentDay = new Date(fromDateValue);
+                currentDay.setDate(currentDay.getDate() + i); // Set to the correct weekday date
+                const formattedDate = currentDay.toISOString().split('T')[0]; // Format as yyyy-mm-dd
+                document.getElementById(`${daysOfWeek[i]}-date`).textContent = formattedDate; // Update date span
+            }
+        }
     }
-}
 
-// Function to update total hours for each row
-function updateTotalHours(row) {
-    let totalMinutes = 0;
+    // Function to update total hours for each row
+    function updateTotalHours(row) {
+        let totalMinutes = 0;
 
-    row.querySelectorAll('input.hours-input').forEach(input => {
-        const timeValue = input.value || "00:00"; // Default to "00:00" if input is empty
-        const [hours, minutes] = timeValue.split(':').map(Number);
-        totalMinutes += (hours * 60) + minutes;
-    });
+        row.querySelectorAll('input.hours-input').forEach(input => {
+            const timeValue = input.value || "00:00"; // Default to "00:00" if input is empty
+            const [hours, minutes] = timeValue.split(':').map(Number);
+            totalMinutes += (hours * 60) + minutes;
+        });
 
-    const totalHours = (totalMinutes / 60).toFixed(2);
-    row.querySelector('.total-hours').textContent = totalHours; // Display total hours in the row
-}
+        const totalHours = (totalMinutes / 60).toFixed(2);
+        row.querySelector('.total-hours').textContent = totalHours; // Display total hours in the row
+    }
 
     // Initialize event listeners for existing inputs
     function initInputListeners(row) {
@@ -245,25 +253,25 @@ function updateTotalHours(row) {
     // Call initInputListeners for the first row
     initInputListeners(document.querySelector('.timesheet-row'));
 
-// Function to handle adding a new row
-function addRow() {
-    const newRow = document.createElement('tr');
-    newRow.classList.add('timesheet-row');
-    newRow.innerHTML = `
-        <td contenteditable="true" class="project-input"></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-        <td class="total-hours"></td>
-    `;
+    // Function to handle adding a new row
+    function addRow() {
+        const newRow = document.createElement('tr');
+        newRow.classList.add('timesheet-row');
+        newRow.innerHTML = `
+            <td contenteditable="true" class="project-input"></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td class="total-hours"></td>
+        `;
 
-    document.getElementById('timesheet-body').appendChild(newRow);
-    initInputListeners(newRow);
-}
+        document.getElementById('timesheet-body').appendChild(newRow);
+        initInputListeners(newRow);
+    }
 
     function submitTimesheet() {
         const rows = document.querySelectorAll('.timesheet-table tbody tr');
@@ -352,30 +360,35 @@ function addRow() {
             });
     }
 
-// Function to reset the timesheet table
-function resetTable() {
-    document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
-        cell.textContent = '';
-    });
+    // Function to reset the timesheet table
+    function resetTable() {
+        document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
+            cell.textContent = '';
+        });
 
-    document.querySelectorAll('input.hours-input').forEach(input => {
-        input.value = '';
-    });
+        document.querySelectorAll('input.hours-input').forEach(input => {
+            input.value = '';
+        });
 
-    document.querySelectorAll('.total-hours').forEach(cell => {
-        cell.textContent = '';
-    });
+        document.querySelectorAll('.total-hours').forEach(cell => {
+            cell.textContent = '';
+        });
 
-    document.querySelector('.from-date').value = '';
-    document.querySelector('.to-date').value = '';
+        document.querySelector('.from-date').value = '';
+        document.querySelector('.to-date').value = '';
 
-    const rows = document.querySelectorAll('.timesheet-row');
-    rows.forEach((row, index) => {
-        if (index > 0) row.remove();
-    });
-}
+        const rows = document.querySelectorAll('.timesheet-row');
+        rows.forEach((row, index) => {
+            if (index > 0) row.remove();
+        });
+        autoFillToDateAndDays();
+        const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        daysOfWeek.forEach(day => {
+            document.getElementById(`${day}-date`).textContent = ''; // Clear the date display
+        });
+    }
 
-initInputListeners(document.querySelector('.timesheet-row'));
+    initInputListeners(document.querySelector('.timesheet-row'));
 
 </script>
 
