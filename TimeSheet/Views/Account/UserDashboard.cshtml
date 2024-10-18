@@ -307,23 +307,25 @@
                     allValid = false;
                 }
 
-                hours.push(`${hoursPart}:${minutesPart.toString().padStart(2, '0')}`);
+                // Convert HH:MM to decimal (e.g., 03:30 -> 3.5)
+                const decimalHours = hoursPart + (minutesPart / 60);
+                hours.push(decimalHours);
             });
 
             if (rowValid) {
-                const totalHours = row.querySelector('.total-hours').textContent.trim() || "";
+                const totalHours = hours.reduce((sum, current) => sum + current, 0); // Calculate total hours
 
                 data.push({
                     Project: project,
                     FromDate: fromDate,
                     ToDate: toDate,
-                    Monday: hours[0],
-                    Tuesday: hours[1],
-                    Wednesday: hours[2],
-                    Thursday: hours[3],
-                    Friday: hours[4],
-                    Saturday: hours[5],
-                    Sunday: hours[6],
+                    Monday: hours[0] || 0,
+                    Tuesday: hours[1] || 0,
+                    Wednesday: hours[2] || 0,
+                    Thursday: hours[3] || 0,
+                    Friday: hours[4] || 0,
+                    Saturday: hours[5] || 0,
+                    Sunday: hours[6] || 0,
                     TotalHours: totalHours
                 });
             }
@@ -346,19 +348,25 @@
                     return;
                 }
                 if (!response.ok) {
-                    return response.json().then(err => { throw err; });
+                    // More detailed error logging
+                    return response.json().then(err => {
+                        console.error('Error response from server:', err);
+                        throw new Error(`Server Error: ${response.status}`);
+                    });
                 }
                 return response.json();
             })
             .then(result => {
                 alert('Timesheet submitted successfully!');
-                resetTable();
+                resetTable(); // Reset the table after successful submission
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to submit timesheet. Please try again.');
+                console.error('Submission Error:', error);
+                alert(`Failed to submit timesheet. Please try again. Error: ${error.message}`);
             });
     }
+
+
 
     // Function to reset the timesheet table
     function resetTable() {
