@@ -3,6 +3,7 @@ using TimeSheet.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 namespace TimeSheet.Controllers
 {
@@ -96,6 +97,69 @@ namespace TimeSheet.Controllers
 
             return View(timesheetHistory);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetTimesheetData(DateTime? fromDate, DateTime? toDate)
+        {
+            // Check if fromDate or toDate is null
+            if (!fromDate.HasValue || !toDate.HasValue)
+            {
+                return BadRequest("FromDate and ToDate cannot be null.");
+            }
+
+            // Log the values to the console for debugging
+            Console.WriteLine($"FromDate: {fromDate.Value}");
+            Console.WriteLine($"ToDate: {toDate.Value}");
+            
+
+
+            // Retrieve the logged-in user's username from the session
+            var username = HttpContext.Session.GetString("Username");
+            if (string.IsNullOrEmpty(username))
+            {
+                return Unauthorized(); // User is not logged in
+            }
+
+            // Fetch the user from the database based on the username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+            if (user == null)
+            {
+                return Unauthorized(); // User not found
+            }
+
+            // Get the user ID from the retrieved user
+            var userId = user.Id;
+
+            // Fetch timesheet entries based on the provided dates
+            var timesheetEntries = await _context.Timesheets
+                .Where(t => t.UserId == userId && t.FromDate >= fromDate.Value && t.ToDate <= toDate.Value)
+                .ToListAsync();
+
+            // Check if any entries were found
+            if (!timesheetEntries.Any())
+            {
+                return NotFound(); // Return a 404 if no timesheet entries are found
+            }
+
+            // Return the data in JSON format
+            var result = timesheetEntries.Select(entry => new
+            {
+                entry.Project,
+                entry.Monday,
+                entry.Tuesday,
+                entry.Wednesday,
+                entry.Thursday,
+                entry.Friday,
+                entry.Saturday,
+                entry.Sunday,
+                TotalHours = entry.TotalHours
+            });
+
+            Console.WriteLine($"final data: {result}");
+            return Ok(result);
+        }
+
+
 
 
         [HttpPost]

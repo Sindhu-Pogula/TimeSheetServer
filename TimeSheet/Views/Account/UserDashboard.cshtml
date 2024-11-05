@@ -27,9 +27,9 @@
 
 <div class="date-container">
     <label><b>From Date:</b></label>
-    <input type="date" name="fromDate" class="from-date" autocomplete="off" onchange="autoFillToDateAndDays()" />
+    <input type="date" name="fromDate" class="from-date" autocomplete="off" onchange="autoFillToDateAndDays(); fetchTimesheetData()" />
     <label><b>To Date:</b></label>
-    <input type="date" name="toDate" class="to-date" autocomplete="off" readonly />
+    <input type="date" name="toDate" class="to-date" autocomplete="off" onchange="fetchTimesheetData()" readonly />
 </div>
 
 <table class="timesheet-table">
@@ -196,12 +196,12 @@
             border-color: #146c43;
         }
 
-    .hours-input{
+    .hours-input {
         border: none;
         font-family: serif;
     }
 
-    .total-hours{
+    .total-hours {
         font-family: serif;
     }
 </style>
@@ -267,16 +267,16 @@
         const newRow = document.createElement('tr');
         newRow.classList.add('timesheet-row');
         newRow.innerHTML = `
-            <td contenteditable="true" class="project-input"></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td class="total-hours"></td>
-        `;
+                <td contenteditable="true" class="project-input"></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+                <td class="total-hours"></td>
+            `;
 
         document.getElementById('timesheet-body').appendChild(newRow);
         initInputListeners(newRow);
@@ -375,6 +375,91 @@
             });
     }
 
+    function fetchTimesheetData() {
+        const fromDate = document.querySelector('.from-date').value;
+        const toDate = document.querySelector('.to-date').value;
+
+        if (!fromDate || !toDate) {
+            return; // Exit if dates are not selected
+        }
+
+        // Fetch timesheet data from the server
+        fetch(`/Timesheet/GetTimesheetData?fromDate=${fromDate}&toDate=${toDate}`)
+            .then(response => {
+                if (response.status === 404) {
+                    alert('No timesheet data found for the selected dates.');
+                    return [];
+                }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch timesheet data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear the existing rows
+                const tableBody = document.getElementById('timesheet-body');
+                tableBody.innerHTML = ''; // Clear existing rows
+                console.log(data)
+                // Populate rows with fetched data
+                data.forEach(entry => {
+                    console.log(entry);
+                    const newRow = document.createElement('tr');
+                    newRow.classList.add('timesheet-row');
+                    newRow.innerHTML = `
+                        <td contenteditable="true" class="project-input">${entry.project}</td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.monday)}" /></td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.tuesday)}" /></td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.wednesday)}" /></td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.thursday)}" /></td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.friday)}" /></td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.saturday)}" /></td>
+                        <td><input type="time" class="hours-input" value="${formatTime(entry.sunday)}" /></td>
+                        <td class="total-hours">${entry.TotalHours}</td>
+                    `;
+                    tableBody.appendChild(newRow);
+                    initInputListeners(newRow); // Initialize event listeners
+                });
+            })
+            .catch(error => console.error('Error fetching timesheet data:', error));
+    }
+
+    // Helper function to format time (decimal hours to HH:MM)
+    function formatTime(hoursDecimal) {
+        const hours = Math.floor(hoursDecimal);
+        const minutes = Math.round((hoursDecimal - hours) * 60);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
+
+    function populateTimesheetRows(data) {
+        const timesheetBody = document.getElementById('timesheet-body');
+        timesheetBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(entry => {
+            const newRow = document.createElement('tr');
+            newRow.classList.add('timesheet-row');
+            newRow.innerHTML = `
+                    <td contenteditable="true" class="project-input">${entry.Project}</td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Monday)}" required /></td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Tuesday)}" required /></td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Wednesday)}" required /></td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Thursday)}" required /></td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Friday)}" required /></td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Saturday)}" required /></td>
+                    <td><input type="time" class="hours-input" value="${formatTime(entry.Sunday)}" required /></td>
+                    <td class="total-hours">${entry.TotalHours}</td>
+                `;
+            timesheetBody.appendChild(newRow);
+            initInputListeners(newRow); // Reinitialize input listeners for the new row
+        });
+    }
+
+    // Helper function to format hours into HH:MM format
+    function formatTime(decimalHours) {
+        const hours = Math.floor(decimalHours);
+        const minutes = Math.round((decimalHours - hours) * 60);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
 
 
     // Function to reset the timesheet table
