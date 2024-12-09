@@ -1,0 +1,13 @@
+﻿@model List<TimeSheet.Models.Project>
+
+<h1>Admin Dashboard</h1>
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" href="@Url.Action("Index", "Admin")">Dashboard</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="@Url.Action("UploadCSV", "Project")">Upload CSV</a>
+    </li>
+</ul>
+

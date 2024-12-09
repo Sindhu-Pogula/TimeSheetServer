@@ -1,118 +1,127 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 using TimeSheet.Models;
 
-public class AccountController : Controller
+namespace TimeSheet.Controllers
 {
-    private readonly ApplicationDbContext _context;
+    public class AccountController : Controller
+    {
+        private readonly ApplicationDbContext _context;
 
-    public AccountController(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
-    // GET: Account/Signup
-    public ActionResult Signup()
-    {
-        return View();
-    }
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public Task<IActionResult> Logout()
-    {
-        //await SignInManager.SignOutAsync();  // Ensure the user is logged out
-        return Task.FromResult<IActionResult>(RedirectToAction("Login", "Account"));  // Redirect to the Index action of HomeController
-    }
-
-    // POST: Account/Signup
-    [HttpPost]
-    public async Task<ActionResult> Signup(User user)
-    {
-        if (ModelState.IsValid)
+        public AccountController(ApplicationDbContext context)
         {
-            // Check if a user with the same username already exists
-            if (await _context.Users.AnyAsync(u => u.Username == user.Username))
-            {
-                // Add a model error to indicate that the user already exists
-                ModelState.AddModelError("Username", "User already exists.");
-                return View(user);
-            }
-
-            // Add user to the database
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            // Set a flag in session to indicate successful registration
-            HttpContext.Session.SetString("RegistrationSuccess", "true");
-
-            // Redirect to the Login page after successful signup
-            return RedirectToAction("Login");
+            _context = context;
         }
 
-        return View(user);
-    }
-
-    // GET: Account/Login
-    public ActionResult Login()
-    {
-        return View();
-    }
-
-    // POST: Account/Login
-    [HttpPost]
-    public async Task<ActionResult> Login(string username, string password)
-    {
-        // Find the user by username
-        var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
-
-        if (user != null)
+        // GET: Account/Signup
+        public ActionResult Signup()
         {
-            // Check if the password is correct
-            if (user.Password == password)
-            {
-                // Store user in session
-                HttpContext.Session.SetString("Username", user.Username);
+            return View();
+        }
 
-                // Redirect to the UserDashboard if the login is successful
-                return RedirectToAction("UserDashboard");
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Signup(User user)
+        {
+            if (ModelState.IsValid)
+            {
+                // Check if a user with the same username already exists
+                if (await _context.Users.AnyAsync(u => u.Username == user.Username))
+                {
+                    ModelState.AddModelError("Username", "User already exists.");
+                    return View(user);
+                }
+
+                // Assign the default role to the user
+                user.Role = "Admin";
+
+                // Add user to the database
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.SetString("RegistrationSuccess", "true");
+                return RedirectToAction("Login");
+            }
+
+            return View(user);
+        }
+
+        // GET: Account/Login
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Account/Login
+        [HttpPost]
+        public async Task<ActionResult> Login(string username, string password)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user != null)
+            {
+                if (user.Password == password)
+                {
+                    HttpContext.Session.SetString("Username", user.Username);
+                    HttpContext.Session.SetString("Role", user.Role);
+
+                    if (user.Role == "Admin")
+                    {
+                        return RedirectToAction("AdminDashboard", "Admin");
+                    }
+                    else if (user.Role == "User")
+                    {  
+                        return RedirectToAction("UserDashboard");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("Password", "Invalid password.");
+                }
             }
             else
             {
-                // Add an error for incorrect password
-                ModelState.AddModelError("Password", "Invalid password.");
+                ModelState.AddModelError("Username", "Username not found.");
             }
+
+            return View();
         }
-        else
+
+        // GET: Account/AdminDashboard
+        public ActionResult AdminDashboard()
         {
-            // Optionally, show an error for username not found
-            ModelState.AddModelError("Username", "Username not found.");
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Admin")
+            {
+                return RedirectToAction("Login");
+            }
+
+            return View();
         }
 
-        // Return the view with errors
-        return View();
-    }
-    // GET: Account/UserDashboard
-    public ActionResult UserDashboard()
-    {
-        // Retrieve the logged-in user's username from session
-        var username = HttpContext.Session.GetString("Username");
-
-        if (string.IsNullOrEmpty(username))
+        // GET: Account/UserDashboard
+        public ActionResult UserDashboard()
         {
-            // If no user is logged in, redirect to Login page
-            return RedirectToAction("Login");
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "User")
+            {
+                return RedirectToAction("Login");
+            }
+
+            var username = HttpContext.Session.GetString("Username");
+            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+
+            return View(user);
         }
 
-        // Find the user based on the username stored in session
-        var user = _context.Users.SingleOrDefault(u => u.Username == username);
-
-        if (user == null)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public Task<IActionResult> Logout()
         {
-            // If user is not found, redirect to Login page
-            return RedirectToAction("Login");
+            //await SignInManager.SignOutAsync();  // Ensure the user is logged out
+            return Task.FromResult<IActionResult>(RedirectToAction("Login", "Account"));  // Redirect to the Index action of HomeController
         }
-
-        // Pass the user model to the UserDashboard view
-        return View(user);
     }
 }

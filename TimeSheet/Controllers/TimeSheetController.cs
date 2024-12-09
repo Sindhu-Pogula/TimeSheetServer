@@ -104,7 +104,7 @@ namespace TimeSheet.Controllers
             // Check if fromDate or toDate is null
             if (!fromDate.HasValue || !toDate.HasValue)
             {
-                return BadRequest("FromDate and ToDate cannot be null.");
+                return BadRequest("FromDate and TotDate cannot be null.");
             }
 
             // Log the values to the console for debugging

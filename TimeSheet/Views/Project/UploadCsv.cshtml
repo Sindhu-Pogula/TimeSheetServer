@@ -1,0 +1,39 @@
+﻿@model List<TimeSheet.Models.Project>
+
+@{
+    ViewData["Title"] = "Upload CSV";
+}
+
+<h2>Upload CSV</h2>
+
+<!-- Form to upload CSV -->
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <button type="submit">Upload</button>
+</form>
+
+@if (Model != null && Model.Count > 0)
+{
+    <h3>Uploaded Projects:</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Project Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model)
+            {
+                <tr>
+                    <td>@project.ProjectName</td>
+                    <td>@project.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No data to display.</p>
+}

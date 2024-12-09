@@ -28,5 +28,8 @@ namespace TimeSheet.Models
         [DataType(DataType.Password)]
         [Compare("Password")]
         public required string ConfirmPassword { get; set; }
+       // [Required]
+        public string Role { get; set; } = "User"; // Default to "User"
+
     }
 }
