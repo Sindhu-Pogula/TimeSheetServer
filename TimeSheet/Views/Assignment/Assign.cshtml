@@ -1,0 +1,52 @@
+﻿@model TimeSheet.Models.UserProjectAssignment
+
+@{
+    ViewData["Title"] = "Assign User to Project";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4><i class="fas fa-user-plus"></i> Assign User to Project</h4>
+                </div>
+                <div class="card-body">
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+                    }
+
+                    <form asp-action="Assign" method="post">
+                        <div class="mb-3">
+                            <label for="UserId" class="form-label"><i class="fas fa-user"></i> Select User:</label>
+                            <select asp-for="UserId" asp-items="ViewBag.Users" class="form-control">
+                                <option value="">Select User</option>
+                            </select>
+                            <span asp-validation-for="UserId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ProjectId" class="form-label"><i class="fas fa-tasks"></i> Select Project:</label>
+                            <select asp-for="ProjectId" asp-items="ViewBag.Projects" class="form-control">
+                                <option value="">Select Project</option>
+                            </select>
+                            <span asp-validation-for="ProjectId" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success"><i class="fas fa-check-circle"></i> Assign</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

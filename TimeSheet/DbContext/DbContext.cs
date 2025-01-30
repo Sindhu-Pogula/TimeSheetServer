@@ -11,6 +11,7 @@ namespace TimeSheet.Models
         public DbSet<User> Users { get; set; }
         public DbSet<Timesheet>Timesheets { get; set; }
         public DbSet<Project> Projects { get; set; } // DbSet for Projects
+        public DbSet<UserProjectAssignment> UserProjectAssignments { get; set; } // New Table
 
     }
 }

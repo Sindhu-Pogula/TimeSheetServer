@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Assign User";
+}
+
+<h2>Assign User</h2>
+
+<!-- Display success/error messages -->
+@if (TempData["Message"] != null)
+{
+    var messageType = TempData["MessageType"]?.ToString();
+    <div class="alert @(messageType == "success" ? "alert-success" : "alert-danger")">
+        @TempData["Message"]
+    </div>
+}
+
+<form asp-action="AssignUser" method="post">
+    <div class="form-group">
+        <label for="selectedUser">Select a User:</label>
+        <select id="selectedUser" name="selectedUser" class="form-control">
+            <option value="">-- Select User --</option>
+            @foreach (var user in ViewBag.Users as List<string>)
+            {
+                <option value="@user">@user</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Assign</button>
+</form>
