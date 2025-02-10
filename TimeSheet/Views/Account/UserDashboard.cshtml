@@ -1,81 +1,5 @@
 ﻿@model TimeSheet.Models.User
 
-<div class="logout-container">
-    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
-        <button type="submit" style="background: none; border: none; cursor: pointer; color: #4CAF50;">
-            <i class="fa fa-power-off" aria-hidden="true"></i> Logout
-        </button>
-    </form>
-</div>
-<h2>Welcome, @Model.Username</h2>
-<p>This is your dashboard, <b>@Model.Username</b>. You are logged in!</p>
-<form asp-action="Signup" method="post">
-    <div class="form-group">
-        <b> <label asp-for="Username" class="control-label">Username:</label></b>
-        <span class="form-control-plaintext">@Model.Username</span>
-        <input type="hidden" asp-for="Username" />
-    </div>
-
-    <div class="form-group">
-        <b><label asp-for="Email" class="control-label">Email:</label></b>
-        <span class="form-control-plaintext">@Model.Email</span>
-        <input type="hidden" asp-for="Email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-</form>
-
-<div class="date-container">
-    <label><b>From Date:</b></label>
-    <input type="date" name="fromDate" class="from-date" autocomplete="off" onchange="autoFillToDateAndDays(); fetchTimesheetData()" />
-    <label><b>To Date:</b></label>
-    <input type="date" name="toDate" class="to-date" autocomplete="off" onchange="fetchTimesheetData()" readonly />
-</div>
-
-<table class="timesheet-table">
-    <thead>
-        <tr>
-            <th>Projects</th>
-            <th>Monday <br /><span id="monday-date"></span></th>
-            <th>Tuesday <br /><span id="tuesday-date"></span></th>
-            <th>Wednesday <br /><span id="wednesday-date"></span></th>
-            <th>Thursday <br /><span id="thursday-date"></span></th>
-            <th>Friday <br /><span id="friday-date"></span></th>
-            <th>Saturday <br /><span id="saturday-date"></span></th>
-            <th>Sunday <br /><span id="sunday-date"></span></th>
-            <th>Total Hours</th>
-        </tr>
-    </thead>
-    <tbody id="timesheet-body">
-        <tr class="timesheet-row">
-            <td contenteditable="true" class="project-input"></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
-            <td class="total-hours"></td> <!-- Ensure this class is present -->
-        </tr>
-    </tbody>
-</table>
-<div class="add-row">
-    <button id="addRowButton" class="btn btn-success" onclick="addRow()">Add Row</button>
-</div>
-
-<div class="action-buttons">
-    <div class="button-container">
-        <a href="/Timesheet/History" class="btn btn-primary history-icon">
-            <i class="fa fa-history"></i> View Timesheet History
-        </a>
-    </div>
-    <div class="button-container">
-        <button type="button" class="reset" onclick="resetTable()">Reset</button>
-        <button type="button" onclick="submitTimesheet()">Submit</button>
-    </div>
-</div>
-
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -204,7 +128,167 @@
     .total-hours {
         font-family: serif;
     }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        width: 300px;
+    }
+
+    /* Modal Buttons */
+    .modal-buttons {
+        margin-top: 20px;
+    }
+
+    .confirm-btn, .cancel-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 5px;
+    }
+
+    .confirm-btn {
+        background-color: #d9534f;
+        color: white;
+    }
+
+        .confirm-btn:hover {
+            background-color: #c9302c;
+        }
+
+    .cancel-btn {
+        background-color: #5bc0de;
+        color: white;
+    }
+
+        .cancel-btn:hover {
+            background-color: #31b0d5;
+        }
+
+    /* Logout Button */
+    .logout-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #4CAF50;
+        font-size: 16px;
+    }
+
+        .logout-btn:hover {
+            color: #388E3C;
+        }
 </style>
+<!-- Logout Button -->
+<div class="logout-container">
+    <button type="button" class="logout-btn" onclick="openLogoutModal()">
+        <i class="fa fa-power-off"></i> Logout
+    </button>
+</div>
+
+<!-- Custom Logout Confirmation Modal -->
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <p>Are you sure you want to logout?</p>
+        <div class="modal-buttons">
+            <button class="confirm-btn" onclick="logout()">Yes</button>
+            <button class="cancel-btn" onclick="closeLogoutModal()">No</button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Logout Form -->
+<form id="logoutForm" asp-area="" asp-controller="Account" asp-action="Logout" method="post"></form>
+
+<!-- JavaScript for Modal -->
+
+<h2>Welcome, @Model.Username</h2>
+<p>This is your dashboard, <b>@Model.Username</b>. You are logged in!</p>
+<form asp-action="Signup" method="post">
+    <div class="form-group">
+        <b> <label asp-for="Username" class="control-label">Username:</label></b>
+        <span class="form-control-plaintext">@Model.Username</span>
+        <input type="hidden" asp-for="Username" />
+    </div>
+
+    <div class="form-group">
+        <b><label asp-for="Email" class="control-label">Email:</label></b>
+        <span class="form-control-plaintext">@Model.Email</span>
+        <input type="hidden" asp-for="Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+</form>
+
+<div class="date-container">
+    <label><b>From Date:</b></label>
+    <input type="date" name="fromDate" class="from-date" autocomplete="off" onchange="autoFillToDateAndDays(); fetchTimesheetData()" />
+    <label><b>To Date:</b></label>
+    <input type="date" name="toDate" class="to-date" autocomplete="off" onchange="fetchTimesheetData()" readonly />
+</div>
+
+<table class="timesheet-table">
+    <thead>
+        <tr>
+            <th>Projects</th>
+            <th>Monday <br /><span id="monday-date"></span></th>
+            <th>Tuesday <br /><span id="tuesday-date"></span></th>
+            <th>Wednesday <br /><span id="wednesday-date"></span></th>
+            <th>Thursday <br /><span id="thursday-date"></span></th>
+            <th>Friday <br /><span id="friday-date"></span></th>
+            <th>Saturday <br /><span id="saturday-date"></span></th>
+            <th>Sunday <br /><span id="sunday-date"></span></th>
+            <th>Total Hours</th>
+        </tr>
+    </thead>
+    <tbody id="timesheet-body">
+        <tr class="timesheet-row">
+            <td contenteditable="true" class="project-input"></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td><input type="time" class="hours-input" min="00:00" max="24:00" required /></td>
+            <td class="total-hours"></td> <!-- Ensure this class is present -->
+        </tr>
+    </tbody>
+</table>
+<div class="add-row">
+    <button id="addRowButton" class="btn btn-success" onclick="addRow()">Add Row</button>
+</div>
+
+<div class="action-buttons">
+    <div class="button-container">
+        <a href="/Timesheet/History" class="btn btn-primary history-icon">
+            <i class="fa fa-history"></i> View Timesheet History
+        </a>
+    </div>
+    <div class="button-container">
+        <button type="button" class="reset" onclick="resetTable()">Reset</button>
+        <button type="button" onclick="submitTimesheet()">Submit</button>
+    </div>
+</div>
+
+
 
 <script>
     function autoFillToDateAndDays() {
@@ -492,5 +576,15 @@
 
     initInputListeners(document.querySelector('.timesheet-row'));
 
-</script>
+    function openLogoutModal() {
+        document.getElementById("logoutModal").style.display = "flex";
+    }
 
+    function closeLogoutModal() {
+        document.getElementById("logoutModal").style.display = "none";
+    }
+
+    function logout() {
+        document.getElementById("logoutForm").submit();
+    }
+</script>

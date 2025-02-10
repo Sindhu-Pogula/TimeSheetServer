@@ -122,7 +122,21 @@
         </tbody>
     </table>
 }
-else
+@* else
 {
     <p>No data to display.</p>
+}
+ *@
+@if (TempData["DuplicateMessage"] != null)
+{
+        <div class="alert alert-warning">
+        @TempData["DuplicateMessage"]
+        </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+        <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+        </div>
 }

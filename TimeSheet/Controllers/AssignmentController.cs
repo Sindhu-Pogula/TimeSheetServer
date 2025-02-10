@@ -23,7 +23,14 @@ namespace TimeSheet.Controllers
             ViewBag.Projects = new SelectList(await _context.Projects.ToListAsync(), "Id", "ProjectName");
             return View();
         }
-
+        [HttpGet]
+        public async Task<IActionResult> GetProjects()
+        {
+            var projects = await _context.Projects
+                .Select(p => new { p.Id, p.ProjectName })
+                .ToListAsync();
+            return Json(projects);
+        }
         // POST: Assignment/Assign
         [HttpPost]
         [ValidateAntiForgeryToken]

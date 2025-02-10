@@ -82,4 +82,12 @@ public class AdminController : Controller
 
         return RedirectToAction("AdminDashboard");
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public Task<IActionResult> Logout()
+    {
+        //await SignInManager.SignOutAsync();  // Ensure the user is logged out
+        return Task.FromResult<IActionResult>(RedirectToAction("Login", "Account"));  // Redirect to the Index action of HomeController
+    }
 }

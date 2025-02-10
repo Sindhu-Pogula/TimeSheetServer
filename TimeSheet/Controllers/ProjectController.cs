@@ -47,6 +47,7 @@ public class ProjectController : Controller
                     if (exists)
                     {
                         duplicateProjects.Add(projectName);
+                        //TempData["DuplicateMessage"] = $"The following projects already exist: {string.Join(", ", duplicateProjects)}";
                     }
                     else
                     {
