@@ -12,7 +12,7 @@ using TimeSheet.Models;
 namespace TimeSheet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250130101145_initialcreate")]
+    [Migration("20250209171334_initialcreate")]
     partial class initialcreate
     {
         /// <inheritdoc />

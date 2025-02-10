@@ -34,8 +34,8 @@ namespace TimeSheet.Controllers
                     return View(user);
                 }
 
-                // Assign the default role to the user
-                user.Role = "Admin";
+                // Ensure role is assigned correctly (default to "User" if not provided)
+                user.Role = string.IsNullOrEmpty(user.Role) ? "User" : user.Role;
 
                 // Add user to the database
                 _context.Users.Add(user);
