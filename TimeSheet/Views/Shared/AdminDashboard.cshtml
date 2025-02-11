@@ -7,8 +7,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .logout-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .logout-container button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: #4CAF50;
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        .logout-container button:hover {
+            color: #d9534f;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+        }
+
+        .confirm-btn, .cancel-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        .confirm-btn {
+            background-color: #d9534f;
+            color: white;
+        }
+
+        .confirm-btn:hover {
+            background-color: #c9302c;
+        }
+
+        .cancel-btn {
+            background-color: #5bc0de;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: #31b0d5;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            color: #388E3C;
+        }
+    </style>
 </head>
 <body>
+
+    <form id="logoutForm" asp-controller="Admin" asp-action="Logout" method="post"></form>
+
+    <!-- Logout Button -->
+    <div class="logout-container">
+        <button type="button" class="logout-btn" onclick="openLogoutModal()">
+            <i class="fa fa-power-off"></i> Logout
+        </button>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-buttons">
+                <button class="confirm-btn" onclick="logout()">Yes</button>
+                <button class="cancel-btn" onclick="closeLogoutModal()">No</button>
+            </div>
+        </div>
+    </div>
 
     <div class="container mt-3">
         <h1>Admin Dashboard</h1>
@@ -26,7 +134,7 @@
             </li>
         </ul>
 
-        <!-- Dashboard Content (This is visible by default) -->
+        <!-- Dashboard Content -->
         <div id="dashboardContent" class="mt-3">
             <h2>Welcome to the Admin Dashboard</h2>
             <p>Manage your projects and assignments from here.</p>
@@ -57,6 +165,18 @@
                 });
             });
         });
+
+        function openLogoutModal() {
+            document.getElementById("logoutModal").style.display = "flex";
+        }
+
+        function closeLogoutModal() {
+            document.getElementById("logoutModal").style.display = "none";
+        }
+
+        function logout() {
+            document.getElementById("logoutForm").submit();
+        }
     </script>
 
 </body>
