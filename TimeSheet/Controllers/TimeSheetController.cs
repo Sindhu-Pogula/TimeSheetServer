@@ -110,7 +110,7 @@ namespace TimeSheet.Controllers
             // Log the values to the console for debugging
             Console.WriteLine($"FromDate: {fromDate.Value}");
             Console.WriteLine($"ToDate: {toDate.Value}");
-            
+
 
 
             // Retrieve the logged-in user's username from the session
@@ -211,6 +211,40 @@ namespace TimeSheet.Controllers
             // Return CSV file for download
             return File(bytes, "text/csv", "TimesheetData.csv");
         }
+        [HttpGet]
+        public async Task<IActionResult> GetUserProjects()
+        {
+            var username = HttpContext.Session.GetString("Username");
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var projects = await _context.UserProjectAssignments
+                .Where(p => p.UserId == user.Id)
+                .Select(p => new { p.Id, p.Project })
+                .ToListAsync();
+
+            if (projects.Count == 0)
+            {
+                Console.WriteLine("No projects found for user: " + username);
+            }
+            else
+            {
+                Console.WriteLine("Fetched projects: " + string.Join(", ", projects.Select(p => p.Project)));
+            }
+
+            return Json(projects);
+        }
+
     }
 }
 
