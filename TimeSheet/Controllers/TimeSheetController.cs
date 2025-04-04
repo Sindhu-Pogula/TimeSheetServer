@@ -111,8 +111,6 @@ namespace TimeSheet.Controllers
             Console.WriteLine($"FromDate: {fromDate.Value}");
             Console.WriteLine($"ToDate: {toDate.Value}");
 
-
-
             // Retrieve the logged-in user's username from the session
             var username = HttpContext.Session.GetString("Username");
             if (string.IsNullOrEmpty(username))
@@ -158,10 +156,6 @@ namespace TimeSheet.Controllers
             Console.WriteLine($"final data: {result}");
             return Ok(result);
         }
-
-
-
-
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
@@ -177,6 +171,7 @@ namespace TimeSheet.Controllers
             TempData["SuccessMessage"] = "Deleted successfully!";
             return RedirectToAction("History");
         }
+        [HttpGet]
         public async Task<IActionResult> DownloadTimesheet()
         {
             // Retrieve the logged-in user's username from session
@@ -245,6 +240,16 @@ namespace TimeSheet.Controllers
             return Json(projects);
         }
 
+        
+        [HttpGet]
+        public IActionResult GetProjects()
+        {
+            var projects = _context.Projects.Select(p => p.ProjectName).ToList();
+            return Json(projects);
+        }
     }
 }
+
+
+
 

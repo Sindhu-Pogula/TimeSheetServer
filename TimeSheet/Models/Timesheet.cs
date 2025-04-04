@@ -47,6 +47,5 @@ namespace TimeSheet.Models
 
         [Range(0, 24)]
         public decimal TotalHours { get; set; }
-
     }
 }
