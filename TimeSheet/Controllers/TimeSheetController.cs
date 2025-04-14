@@ -247,6 +247,7 @@ namespace TimeSheet.Controllers
             var projects = _context.Projects.Select(p => p.ProjectName).ToList();
             return Json(projects);
         }
+  
     }
 }
 
