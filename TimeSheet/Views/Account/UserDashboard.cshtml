@@ -21,16 +21,13 @@
             border: 1px solid #ddd;
             text-align: center;
         }
-
         .timesheet-table thead tr {
             background-color: #4CAF50;
             color: white;
         }
-
         .timesheet-table tbody tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-
         .timesheet-table tbody tr:hover {
             background-color: #f1f1f1;
             cursor: pointer;
@@ -57,7 +54,6 @@
     .button-container {
         display: inline-block;
     }
-
         .button-container button {
             background-color: #4CAF50;
             color: white;
@@ -68,17 +64,14 @@
             cursor: pointer;
             border-radius: 5px;
         }
-
         .button-container .reset {
             background-color: #f44336;
         }
-
     .logout-container {
         position: absolute;
         top: 20px;
         right: 20px;
     }
-
         .logout-container button {
             background-color: transparent;
             border: none;
@@ -87,27 +80,22 @@
             font-size: 16px;
             padding: 10px;
         }
-
             .logout-container button:hover {
                 color: #d9534f;
             }
-
     .add-row {
         display: flex;
         justify-content: right;
     }
-
     .btn-success {
         background-color: #4CAF50;
         border-color: #4CAF50;
     }
-
         .btn-success:hover {
             color: #fff;
             background-color: #4CAF50 !important;
             border-color: #146c43;
         }
-
     .hours-input, .total-hours {
         border: none;
         font-family: serif;
@@ -125,7 +113,6 @@
         justify-content: center;
         align-items: center;
     }
-
     .modal-content {
         background: white;
         padding: 20px;
@@ -134,11 +121,9 @@
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
         width: 300px;
     }
-
     .modal-buttons {
         margin-top: 20px;
     }
-
     .confirm-btn, .cancel-btn {
         padding: 10px 20px;
         border: none;
@@ -147,25 +132,20 @@
         font-size: 16px;
         margin: 5px;
     }
-
     .confirm-btn {
         background-color: #d9534f;
         color: white;
     }
-
         .confirm-btn:hover {
             background-color: #c9302c;
         }
-
     .cancel-btn {
         background-color: #5bc0de;
         color: white;
     }
-
         .cancel-btn:hover {
             background-color: #31b0d5;
         }
-
     .logout-btn {
         background: none;
         border: none;
@@ -173,7 +153,6 @@
         color: #4CAF50;
         font-size: 16px;
     }
-
         .logout-btn:hover {
             color: #388E3C;
         }
@@ -216,7 +195,7 @@
     <label><b>From Date:</b></label>
     <input type="date" name="fromDate" class="from-date" autocomplete="off" onchange="autoFillToDateAndDays(); fetchTimesheetData()" />
     <label><b>To Date:</b></label>
-    <input type="date" name="toDate" class="to-date" autocomplete="off" onchange="fetchTimesheetData()" readonly />
+    <input type="date" name="toDate" class="to-date" autocomplete="off" onchange="fetchTimesheetData()" />
 </div>
 <table class="timesheet-table">
     <thead>
@@ -266,176 +245,106 @@
         <button type="button" onclick="submitTimesheet()">Submit</button>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Auto-fill To Date and Weekday Dates based on From Date
-    function autoFillToDateAndDays() {
-        const fromDateInput = document.querySelector('.from-date');
-        const toDateInput = document.querySelector('.to-date');
-
-        if (fromDateInput) {
-            fromDateInput.addEventListener('change', function () {
-                if (fromDateInput.value) {
-                    const fromDateValue = new Date(fromDateInput.value);
-                    if (!isNaN(fromDateValue)) {
-                        const toDateValue = new Date(fromDateValue);
-                        toDateValue.setDate(toDateValue.getDate() + 6);
-                        if (toDateInput) {
-                            toDateInput.value = toDateValue.toISOString().split('T')[0];
-                        }
-
-                        const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                        for (let i = 0; i < 7; i++) {
-                            const currentDay = new Date(fromDateValue);
-                            currentDay.setDate(currentDay.getDate() + i);
-                            const formattedDate = currentDay.toISOString().split('T')[0];
-                            const dayElement = document.getElementById(`${daysOfWeek[i]}-date`);
-                            if (dayElement) {
-                                dayElement.textContent = formattedDate;
-                            }
-                        }
-                    }
-                }
+    let allProjects = [];
+    document.addEventListener('DOMContentLoaded', () => {
+        setupDateHandlers();
+        loadProjects();
+        initInputListeners(document.querySelector('.timesheet-row'));
+    });
+    function setupDateHandlers() {
+        const from = document.querySelector('.from-date');
+        const to = document.querySelector('.to-date');
+        const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        from.addEventListener('change', () => {
+            const start = new Date(from.value);
+            if (isNaN(start)) return;
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            to.value = end.toISOString().split('T')[0];
+            weekdays.forEach((day, i) => {
+                const d = new Date(start);
+                d.setDate(start.getDate() + i);
+                document.getElementById(`${day}-date`).textContent = d.toISOString().split('T')[0];
             });
-        }
-    }
-
-    // Calculate total hours for a row
-    function updateTotalHours(row) {
-        let totalMinutes = 0;
-        row.querySelectorAll('input.hours-input').forEach(input => {
-            const time = input.value || "00:00";
-            const [h, m] = time.split(':').map(Number);
-            totalMinutes += (h * 60 + m);
+            handleDateFilter();
         });
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        row.querySelector('.total-hours').textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+        to.addEventListener('change', handleDateFilter);
     }
-
-    // Set up input validation and update listeners
+    function handleDateFilter() {
+        const from = document.querySelector('.from-date').value;
+        const to = document.querySelector('.to-date').value;
+        if (from && to) fetchTimesheetHistory(from, to);
+    }
+    function loadProjects() {
+        fetch('/Timesheet/GetProjects')
+            .then(res => res.json())
+            .then(data => allProjects = data)
+            .catch(() => alert("Failed to load projects."));
+    }
+    function addRow() {
+        const row = document.createElement('tr');
+        row.className = 'timesheet-row';
+        row.innerHTML = `
+                        <td>
+                            <select class="form-control project-dropdown">
+                                <option value="" disabled selected hidden>Select a Project</option>
+                                ${allProjects.map(p => `<option value="${p}">${p}</option>`).join('')}
+                            </select>
+                        </td>
+                        ${'<td><input type="time" class="hours-input" min="00:00" max="24:00"></td>'.repeat(7)}
+                        <td class="total-hours">0:00</td>
+                    `;
+        document.getElementById('timesheet-body').appendChild(row);
+        initInputListeners(row);
+    }
     function initInputListeners(row) {
-        row.querySelectorAll('input.hours-input').forEach(input => {
-            input.addEventListener('input', function () {
-                const timeValue = this.value;
-                const regex = /^\d{2}:\d{2}$/;
-                if (!regex.test(timeValue)) {
-                    alert("Please enter time in HH:MM format.");
-                    this.value = "00:00";
+        row.querySelectorAll('.hours-input').forEach(input => {
+            input.addEventListener('input', () => {
+                if (!/^\d{2}:\d{2}$/.test(input.value)) {
+                    alert("Invalid time. Use HH:MM format.");
+                    input.value = "";
                 }
                 updateTotalHours(row);
             });
         });
         updateTotalHours(row);
     }
-
-    // Add new timesheet row
-    function addRow() {
-        const newRow = document.createElement('tr');
-        newRow.classList.add('timesheet-row');
-
-        // Create the project dropdown cell
-        const projectCell = document.createElement('td');
-        const select = document.createElement('select');
-        select.classList.add('form-control', 'project-dropdown');
-
-        const placeholder = document.createElement('option');
-        placeholder.text = "Select a Project";
-        placeholder.disabled = true;
-        placeholder.hidden = true;
-        placeholder.selected = true;
-        select.appendChild(placeholder);
-
-        // Use the global allProjects array or clone from existing dropdown
-        if (typeof allProjects !== 'undefined' && allProjects.length > 0) {
-            allProjects.forEach(project => {
-                const opt = document.createElement('option');
-                opt.value = project;
-                opt.textContent = project;
-                select.appendChild(opt);
-            });
-        } else {
-            // fallback: clone from an existing dropdown if any
-            const existingDropdown = document.querySelector('#timesheet-body select');
-            if (existingDropdown) {
-                [...existingDropdown.options].forEach(opt => {
-                    if (opt.value) {
-                        const newOpt = document.createElement('option');
-                        newOpt.value = opt.value;
-                        newOpt.textContent = opt.textContent;
-                        select.appendChild(newOpt);
-                    }
-                });
-            }
-        }
-
-        projectCell.appendChild(select);
-        newRow.appendChild(projectCell);
-
-        // Create input cells for each day
-        for (let i = 0; i < 7; i++) {
-            const dayCell = document.createElement('td');
-            const input = document.createElement('input');
-            input.type = 'time';
-            input.className = 'hours-input';
-            input.min = "00:00";
-            input.max = "24:00";
-            dayCell.appendChild(input);
-            newRow.appendChild(dayCell);
-        }
-
-        // Total Hours cell
-        const totalCell = document.createElement('td');
-        totalCell.className = 'total-hours';
-        totalCell.textContent = '0:00';
-        newRow.appendChild(totalCell);
-
-        // Append the full row to the table body
-        document.getElementById('timesheet-body').appendChild(newRow);
-
-        // Optional: Initialize listeners for the new row
-        initInputListeners(newRow);
+    function updateTotalHours(row) {
+        const totalMins = [...row.querySelectorAll('.hours-input')].reduce((sum, input) => {
+            if (!input.value) return sum;
+            const [h, m] = input.value.split(':').map(Number);
+            return sum + (h * 60 + m);
+        }, 0);
+        const hrs = Math.floor(totalMins / 60);
+        const mins = totalMins % 60;
+        row.querySelector('.total-hours').textContent = `${hrs}:${String(mins).padStart(2, '0')}`;
     }
-
-
-    // Submit timesheet data
     function submitTimesheet() {
-        const rows = document.querySelectorAll('.timesheet-table tbody tr');
+        const from = document.querySelector('.from-date').value;
+        const to = document.querySelector('.to-date').value;
+        if (!from || !to) return alert("Please select From and To dates.");
+        const rows = [...document.querySelectorAll('.timesheet-row')];
         const data = [];
-        const fromDate = document.querySelector('.from-date').value;
-        const toDate = document.querySelector('.to-date').value;
-
-        if (!fromDate || !toDate) {
-            alert("Please select From and To dates.");
-            return;
-        }
-
-        let allValid = true;
-
+        let valid = true;
         rows.forEach(row => {
-            const dropdown = row.querySelector('.project-dropdown');
-            const selectedProject = dropdown?.value;
-            if (!selectedProject) return;
-
-            const hourInputs = row.querySelectorAll('.hours-input');
-            const hours = [];
-            let rowValid = true;
-
-            hourInputs.forEach(input => {
-                const [h, m] = (input.value || "00:00").split(":").map(Number);
+            const project = row.querySelector('.project-dropdown').value;
+            if (!project) return;
+            const hours = [...row.querySelectorAll('.hours-input')].map(input => {
+                if (!input.value) return 0;
+                const [h, m] = input.value.split(':').map(Number);
                 if (isNaN(h) || isNaN(m) || h > 24 || m >= 60) {
-                    alert("Please enter a valid time in HH:MM.");
-                    rowValid = false;
-                    allValid = false;
+                    alert("Invalid time. Max allowed is 24:00.");
+                    valid = false;
                 }
-                hours.push(h + m / 60);
+                return h + m / 60;
             });
-
-            if (rowValid) {
-                const total = hours.reduce((a, b) => a + b, 0);
+            if (valid) {
                 data.push({
-                    Project: selectedProject,
-                    FromDate: fromDate,
-                    ToDate: toDate,
+                    Project: project,
+                    FromDate: from,
+                    ToDate: to,
                     Monday: hours[0] || 0,
                     Tuesday: hours[1] || 0,
                     Wednesday: hours[2] || 0,
@@ -443,184 +352,76 @@
                     Friday: hours[4] || 0,
                     Saturday: hours[5] || 0,
                     Sunday: hours[6] || 0,
-                    TotalHours: total
+                    TotalHours: hours.reduce((a, b) => a + b, 0)
                 });
             }
         });
-
-        if (!allValid || data.length === 0) {
-            alert("No valid rows to submit.");
-            return;
-        }
-
+        if (!valid || !data.length) return alert("No valid rows to submit.");
         fetch('/Timesheet/SaveTimesheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-            .then(res => {
-                if (res.status === 401) {
-                    alert("Session expired. Please log in again.");
-                    return;
-                }
-                if (!res.ok) throw new Error("Server error.");
-                return res.json();
-            })
+            .then(res => res.ok ? res.json() : Promise.reject("Submission failed."))
             .then(() => {
-                alert("Timesheet submitted successfully!");
+                alert("Timesheet submitted!");
                 resetTable();
             })
-            .catch(err => {
-                console.error(err);
-                alert("Error submitting timesheet: " + err.message);
-            });
+            .catch(err => alert("Error: " + err));
     }
-
-    // Reset all fields in the timesheet
-    function resetTimesheet() {
-        document.querySelectorAll('.hours-input').forEach(input => input.value = "00:00");
-    }
-
     function resetTable() {
-        document.querySelectorAll('.timesheet-row').forEach((row, i) => {
-            if (i > 0) row.remove();
-        });
-
-        document.querySelectorAll('.hours-input').forEach(i => i.value = "");
-        document.querySelectorAll('.total-hours').forEach(cell => cell.textContent = "0:00");
+        const firstRow = document.querySelector('.timesheet-row');
+        document.querySelectorAll('.timesheet-row:not(:first-child)').forEach(r => r.remove());
+        firstRow.querySelectorAll('.hours-input').forEach(i => i.value = "");
+        firstRow.querySelector('.total-hours').textContent = "0:00";
         document.querySelector('.from-date').value = '';
         document.querySelector('.to-date').value = '';
-        document.querySelectorAll('.project-dropdown').forEach(d => d.value = '');
-        ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
-            const el = document.getElementById(`${day}-date`);
-            if (el) el.textContent = '';
-        });
-
-        autoFillToDateAndDays();
+        document.querySelectorAll('.project-dropdown').forEach(d => d.selectedIndex = 0);
+        ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day =>
+            document.getElementById(`${day}-date`).textContent = ''
+        );
     }
-
-    // On page load
-    document.addEventListener('DOMContentLoaded', function () {
-        autoFillToDateAndDays();
-        initInputListeners(document.querySelector('.timesheet-row'));
-        document.getElementById('resetButton')?.addEventListener('click', resetTimesheet);
-        document.getElementById('submitButton')?.addEventListener('click', submitTimesheet);
-        //  document.getElementById('addRowButton')?.addEventListener('click', addRow);
-    });
-
-    function openLogoutModal() {
-        document.getElementById("logoutModal").style.display = "flex";
-    }
-    function closeLogoutModal() {
-        document.getElementById("logoutModal").style.display = "none";
-    }
-    function logout() {
-        document.getElementById("logoutForm").submit();
-    }
-</script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        loadInitialProjects();
-        setupDateFilters();
-    });
-
-    // Load initial projects to global variable
-    let allProjects = [];
-
-    function loadInitialProjects() {
-        $.ajax({
-            url: '/Timesheet/GetProjects',
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                allProjects = data;
-                console.log("Loaded projects:", allProjects);
-            },
-            error: function (xhr, status, error) {
-                console.error('Error fetching projects:', error);
-                alert('Failed to load projects.');
-            }
-        });
-    }
-
-    function setupDateFilters() {
-        const fromDateInput = document.querySelector('.from-date');
-        const toDateInput = document.querySelector('.to-date');
-
-        const handleDateChange = () => {
-            const fromDate = fromDateInput.value;
-            const toDate = toDateInput.value;
-            if (fromDate && toDate) {
-                fetchTimesheetHistory(fromDate, toDate);
-            }
-        };
-
-        fromDateInput.addEventListener('change', handleDateChange);
-        toDateInput.addEventListener('change', handleDateChange);
-    }
-
     function fetchTimesheetHistory(fromDate, toDate) {
-        resetTable();
-
+        clearTimesheetBody();
         fetch(`/Timesheet/GetTimesheetData?fromDate=${fromDate}&toDate=${toDate}`)
             .then(res => res.ok ? res.json() : Promise.reject("Failed to fetch timesheet data"))
             .then(data => {
-                const tableBody = document.getElementById('timesheet-body');
-                tableBody.innerHTML = '';
-
+                const tbody = document.getElementById('timesheet-body');
                 if (!data.length) {
-                    tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No records found.</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No records found.</td></tr>`;
                     return;
                 }
-
-                data.forEach(entry => {
-                    const row = createTimesheetRow(entry);
-                    tableBody.insertAdjacentHTML('beforeend', row);
-                });
+                data.forEach(entry => tbody.insertAdjacentHTML('beforeend', createTimesheetRow(entry)));
             })
-            .catch(err => console.error("Fetch Error:", err));
+            .catch(console.error);
     }
-
-    function createTimesheetRow(entry) {
-        const projectOptions = allProjects.map(project => {
-            const selected = (project === entry.project) ? 'selected' : '';
-            return `<option value="${project}" ${selected}>${project}</option>`;
-        });
-
-        const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-        const inputs = weekdays.map(day => `
-            <td>
-                <input type="time" class="hours-input" name="${day}" value="${formatTime(entry[day])}" />
-            </td>
-        `).join('');
-
-        return `
-            <tr class="timesheet-row">
-                <td>
-                    <select class="form-control project-dropdown">
-                        <option value="" disabled ${!entry.project ? 'selected' : ''}>Select a Project</option>
-                        ${projectOptions.join('')}
-                    </select>
-                </td>
-                ${inputs}
-                <td class="total-hours">${entry.totalHours.toFixed(2)}</td>
-            </tr>
-        `;
-    }
-
-    function formatTime(hoursDecimal) {
-        if (isNaN(hoursDecimal)) return '';
-        const hours = Math.floor(hoursDecimal);
-        const minutes = Math.round((hoursDecimal - hours) * 60);
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    }
-
-    function resetTable() {
+    function clearTimesheetBody() {
         document.getElementById('timesheet-body').innerHTML = '';
     }
-
-
+    function createTimesheetRow(entry) {
+        const projectOptions = allProjects.map(p =>
+            `<option value="${p}" ${p === entry.project ? 'selected' : ''}>${p}</option>`
+        ).join('');
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        const inputs = days.map(day => `
+                        <td><input type="time" class="hours-input" name="${day}" value="${formatTime(entry[day])}" /></td>
+                    `).join('');
+        return `
+                        <tr class="timesheet-row">
+                            <td><select class="form-control project-dropdown"><option value="" disabled>Select a Project</option>${projectOptions}</select></td>
+                            ${inputs}
+                            <td class="total-hours">${entry.totalHours.toFixed(2)}</td>
+                        </tr>
+                    `;
+    }
+    function formatTime(value) {
+        if (!value) return "";
+        const hrs = Math.floor(value);
+        const mins = Math.round((value - hrs) * 60);
+        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    }
+    // Logout modal handlers
+    const openLogoutModal = () => document.getElementById("logoutModal").style.display = "flex";
+    const closeLogoutModal = () => document.getElementById("logoutModal").style.display = "none";
+    const logout = () => document.getElementById("logoutForm").submit();
 </script>
-
